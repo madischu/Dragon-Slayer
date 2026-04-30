@@ -31,7 +31,7 @@ Game::Game()
 
 void Game::start()
 {
-    std::cout << "\nWelcome to Dragon Slayer!" << std::endl;
+    std::cout << "\nWelcome to Dragon Slayer. You must defeat the dragon that is preventing people from leaving the town. You are in the Town Square." << std::endl;
 
     while (running)
     {
@@ -119,7 +119,7 @@ void Game::processLocation()
 
     if (location == "Town Square")
     {
-        std::cout << "\nYou are standing in the Town Square." << std::endl;
+        std::cout << "\nYou are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'." << std::endl;
         actionLog.push("Visited Town Square");
     }
     else if (location == "Store")

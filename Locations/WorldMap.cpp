@@ -45,16 +45,19 @@ void WorldMap::buildDefaultMap()
 {
     addLocation("Town Square");
     addLocation("Store");
-    addLocation("Caves");
-    addLocation("Dark Forest");
     addLocation("Ancient Ruins");
+    addLocation("Dark Forest");
+    addLocation("Caves");
     addLocation("Dragon's Lair");
 
     addPath("Town Square", "Store");
+    addPath("Town Square", "Ancient Ruins");
+    addPath("Town Square", "Dark Forest");
     addPath("Town Square", "Caves");
-    addPath("Caves", "Dark Forest");
-    addPath("Dark Forest", "Ancient Ruins");
+    addPath("Ancient Ruins", "Dark Forest");
     addPath("Ancient Ruins", "Dragon's Lair");
+    addPath("Dark Forest", "Caves");
+    addPath("Caves", "Dragon's Lair");
 
     currentLocationIndex = findLocationIndex("Town Square");
 }
@@ -87,6 +90,24 @@ std::vector<std::string> WorldMap::getAvailablePaths() const
     for (int connectedIndex : locations[currentLocationIndex].connectedLocations)
     {
         paths.push_back(locations[connectedIndex].name);
+    }
+
+    return paths;
+}
+
+std::vector<std::pair<std::string, std::string>> WorldMap::getAllPaths() const
+{
+    std::vector<std::pair<std::string, std::string>> paths;
+
+    for (int fromIndex = 0; fromIndex < static_cast<int>(locations.size()); ++fromIndex)
+    {
+        for (int toIndex : locations[fromIndex].connectedLocations)
+        {
+            if (fromIndex < toIndex)
+            {
+                paths.push_back({ locations[fromIndex].name, locations[toIndex].name });
+            }
+        }
     }
 
     return paths;

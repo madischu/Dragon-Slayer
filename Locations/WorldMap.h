@@ -2,6 +2,7 @@
 #define WORLDMAP_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 class WorldMap
@@ -33,6 +34,7 @@ public:
     void displayCurrentLocation() const;
     void displayAvailablePaths() const;
     std::vector<std::string> getAvailablePaths() const;
+    std::vector<std::pair<std::string, std::string>> getAllPaths() const;
 
     bool moveToLocation(int choice);
     std::string getCurrentLocation() const;
