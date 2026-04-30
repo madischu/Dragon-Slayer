@@ -191,18 +191,18 @@ public:
     {
         if (player.getHealth() == 300)
         {
-            return "Your health is already at the maximum.";
+            return getStoreText("Your health is already at the maximum.");
         }
 
         if (player.getGold() < 10)
         {
-            return "Not enough gold.";
+            return getStoreText("Not enough gold.");
         }
 
         player.subtractGold(10);
         player.addHealth(10);
         addAction("Bought 10 health");
-        return "You bought 10 health.";
+        return getStoreText("You bought 10 health.");
     }
 
     std::string buyWeapon()
@@ -211,7 +211,7 @@ public:
 
         if (player.getGold() < 30)
         {
-            return "Not enough gold.";
+            return getStoreText("Not enough gold.");
         }
 
         if (!inventory.containsItem("Dagger"))
@@ -220,38 +220,38 @@ public:
             inventory.addItem(Item("Dagger", ItemType::Weapon, 30, "Sharp starter weapon"));
             player.equipWeapon("Dagger");
             addAction("Bought Dagger");
-            return "You bought and equipped the Dagger.";
+            return getStoreText("You bought and equipped the Dagger.");
         }
 
         if (!inventory.containsItem("Claw Hammer"))
         {
-            if (player.getXP() < 50)
-            {
-                return "You need at least 50 XP to purchase the Claw Hammer.";
-            }
+                if (player.getXP() < 50)
+                {
+                    return getStoreText("You need at least 50 XP to purchase the Claw Hammer.");
+                }
 
             player.subtractGold(30);
             inventory.addItem(Item("Claw Hammer", ItemType::Weapon, 50, "Strong blunt weapon"));
-            player.equipWeapon("Claw Hammer");
-            addAction("Bought Claw Hammer");
-            return "You bought and equipped the Claw Hammer.";
-        }
+                player.equipWeapon("Claw Hammer");
+                addAction("Bought Claw Hammer");
+                return getStoreText("You bought and equipped the Claw Hammer.");
+            }
 
         if (!inventory.containsItem("Sword"))
         {
-            if (player.getXP() < 150)
-            {
-                return "You need at least 150 XP to purchase the Sword.";
-            }
+                if (player.getXP() < 150)
+                {
+                    return getStoreText("You need at least 150 XP to purchase the Sword.");
+                }
 
             player.subtractGold(30);
             inventory.addItem(Item("Sword", ItemType::Weapon, 100, "Required to defeat the Dragon"));
-            player.equipWeapon("Sword");
-            addAction("Bought Sword");
-            return "You bought and equipped the Sword.";
-        }
+                player.equipWeapon("Sword");
+                addAction("Bought Sword");
+                return getStoreText("You bought and equipped the Sword.");
+            }
 
-        return "You already have the strongest weapon.";
+        return getStoreText("You already have the strongest weapon.");
     }
 
     std::string sellWeapon()
@@ -261,31 +261,31 @@ public:
 
         if (currentWeapon.getName() == "Stick")
         {
-            return "You can't sell your basic weapon.";
+            return getStoreText("You can't sell your basic weapon.");
         }
 
         if (!inventory.removeItem(currentWeapon.getName()))
         {
-            return "Could not sell weapon.";
+            return getStoreText("Could not sell weapon.");
         }
 
         player.addGold(15);
         player.equipWeapon("Stick");
         addAction("Sold " + currentWeapon.getName());
-        return "You sold your " + currentWeapon.getName() + ".";
+        return getStoreText("You sold your " + currentWeapon.getName() + ".");
     }
 
     std::string buyPotion()
     {
         if (player.getGold() < 15)
         {
-            return "Not enough gold.";
+            return getStoreText("Not enough gold.");
         }
 
         player.subtractGold(15);
         player.addItemToInventory(Item("Health Potion", ItemType::Potion, 50, "Restores 50 health"));
         addAction("Bought Health Potion");
-        return "You bought a Health Potion.";
+        return getStoreText("You bought a Health Potion.");
     }
 
     std::string buyArmor()
@@ -294,18 +294,18 @@ public:
 
         if (inventory.containsItem("Leather Armor"))
         {
-            return "You already own Leather Armor.";
+            return getStoreText("You already own Leather Armor.");
         }
 
         if (player.getGold() < 40)
         {
-            return "Not enough gold.";
+            return getStoreText("Not enough gold.");
         }
 
         player.subtractGold(40);
         player.addItemToInventory(Item("Leather Armor", ItemType::Armor, 10, "Basic armor"));
         addAction("Bought Leather Armor");
-        return "You bought Leather Armor.";
+        return getStoreText("You bought Leather Armor.");
     }
 
     std::string leaveStore()
@@ -435,12 +435,12 @@ public:
 
     std::string getStoreText() const
     {
-        return "Store\r\n"
-               "Buy Health: +10 HP for 10 gold\r\n"
-               "Buy Weapon: Dagger, Claw Hammer, then Sword for 30 gold each\r\n"
+        return "Would you like to make a purchase?\r\n"
+               "Health: 10 gold\r\n"
+               "Weapon: 30 gold\r\n"
                "Sell Weapon: +15 gold\r\n"
-               "Buy Potion: Health Potion for 15 gold\r\n"
-               "Buy Armor: Leather Armor for 40 gold";
+               "Potion: 15 gold\r\n"
+               "Armor: 40 gold\r\n";
     }
 
     std::string getCombatText() const
@@ -484,6 +484,11 @@ private:
     {
         actionLog.push(action);
         actions.push_back(action);
+    }
+
+    std::string getStoreText(const std::string& message) const
+    {
+        return message + "\r\n\r\n" + getStoreText();
     }
 
     std::string startCombat(const std::vector<Monster>& monsters, const std::string& action)

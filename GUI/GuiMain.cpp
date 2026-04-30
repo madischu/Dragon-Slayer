@@ -216,6 +216,8 @@ namespace
 
         RECT mapRect = clientRect;
         InflateRect(&mapRect, -10, -10);
+        int mapWidth = mapRect.right - mapRect.left;
+        int mapHeight = mapRect.bottom - mapRect.top;
 
         HBRUSH parchmentBrush = CreateSolidBrush(Parchment);
         FillRect(deviceContext, &mapRect, parchmentBrush);
@@ -231,7 +233,12 @@ namespace
 
         HBRUSH forestBrush = CreateSolidBrush(RGB(103, 130, 82));
         HBRUSH oldRegionBrush = static_cast<HBRUSH>(SelectObject(deviceContext, forestBrush));
-        Ellipse(deviceContext, mapRect.left + 330, mapRect.top + 90, mapRect.left + 520, mapRect.top + 245);
+        Ellipse(
+            deviceContext,
+            mapRect.left + (mapWidth * 47) / 100,
+            mapRect.top + (mapHeight * 30) / 100,
+            mapRect.left + (mapWidth * 74) / 100,
+            mapRect.top + (mapHeight * 82) / 100);
         SelectObject(deviceContext, oldRegionBrush);
         DeleteObject(forestBrush);
 
@@ -239,9 +246,9 @@ namespace
         oldRegionBrush = static_cast<HBRUSH>(SelectObject(deviceContext, mountainBrush));
         POINT mountains[3]
         {
-            { mapRect.left + 210, mapRect.top + 220 },
-            { mapRect.left + 280, mapRect.top + 110 },
-            { mapRect.left + 350, mapRect.top + 220 }
+            { mapRect.left + (mapWidth * 30) / 100, mapRect.top + (mapHeight * 73) / 100 },
+            { mapRect.left + (mapWidth * 40) / 100, mapRect.top + (mapHeight * 37) / 100 },
+            { mapRect.left + (mapWidth * 50) / 100, mapRect.top + (mapHeight * 73) / 100 }
         };
         Polygon(deviceContext, mountains, 3);
         SelectObject(deviceContext, oldRegionBrush);
@@ -432,6 +439,8 @@ namespace
                 {
                     isMapVisible = false;
                     layoutWindow(GetParent(window));
+                    setText(outputBox, message + "\r\n\r\n" + game.interact());
+                    updateButtonLabels(GetParent(window));
                 }
 
                 refreshStatus();
@@ -514,12 +523,14 @@ namespace
             MoveWindow(mapView, contentX, y, contentWidth, contentHeight, TRUE);
             ShowWindow(mapView, SW_SHOW);
             ShowWindow(outputPanel, SW_HIDE);
+            InvalidateRect(mapView, nullptr, TRUE);
         }
         else
         {
             ShowWindow(mapView, SW_HIDE);
             MoveWindow(outputPanel, contentX, y, contentWidth, contentHeight, TRUE);
             ShowWindow(outputPanel, SW_SHOW);
+            InvalidateRect(outputPanel, nullptr, TRUE);
         }
     }
 
@@ -676,6 +687,7 @@ namespace
                     break;
                 case IdQuit:
                     setText(outputBox, game.leaveStore());
+                    isMapVisible = true;
                     break;
                 default:
                     break;
@@ -802,7 +814,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int showCommand)
     windowClass.hInstance = instance;
     windowClass.lpszClassName = windowClassName;
     windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    windowClass.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+    windowClass.hbrBackground = CreateSolidBrush(DarkBackground);
     RegisterClassW(&windowClass);
 
     HWND window = CreateWindowExW(
