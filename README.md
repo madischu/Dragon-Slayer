@@ -77,5 +77,6 @@ Queue (Enemy Encounters / Combat Order)
 
 ## Compile and Run
 
-*g++ main.cpp Game.cpp Weapon.cpp Monster.cpp Player.cpp Location.cpp Store.cpp Caves.cpp DragonsLair.cpp CombatSystem.cpp Item.cpp Inventory.cpp WorldMap.cpp EnemyQueue.cpp ActionStack.cpp -o DragonSlayer*
+*cmake -S . -B build*
+*cmake --build build*
 

@@ -31,7 +31,7 @@ public:
     void travel();
     void fightEnemyWave(EnemyQueue& enemies);
     void fightSingleMonster(Monster& monster);
-    void showMainMenu();
+    void displayMainMenu();
     void restart();
     void winGame();
     void loseGame();

@@ -1,5 +1,27 @@
 #include "Game.h"
 #include <iostream>
+#include <limits>
+
+namespace
+{
+    bool readMenuChoice(int& choice)
+    {
+        if (std::cin >> choice)
+        {
+            return true;
+        }
+
+        if (std::cin.eof())
+        {
+            return false;
+        }
+
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Invalid input. Please enter a number." << std::endl;
+        return false;
+    }
+}
 
 Game::Game()
 {
@@ -9,14 +31,22 @@ Game::Game()
 
 void Game::start()
 {
-    std::cout << "\nWelcome to Dragon Slayer Deluxe!" << std::endl;
+    std::cout << "\nWelcome to Dragon Slayer!" << std::endl;
 
     while (running)
     {
         displayMainMenu();
 
         int choice;
-        std::cin >> choice;
+        if (!readMenuChoice(choice))
+        {
+            if (std::cin.eof())
+            {
+                running = false;
+            }
+
+            continue;
+        }
 
         if (choice == 1)
         {
@@ -69,7 +99,10 @@ void Game::travel()
 
     std::cout << "\nWhere would you like to go? ";
     int choice;
-    std::cin >> choice;
+    if (!readMenuChoice(choice))
+    {
+        return;
+    }
 
     std::string previousLocation = worldMap.getCurrentLocation();
 
