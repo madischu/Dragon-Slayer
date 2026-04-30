@@ -32,6 +32,7 @@ public:
 
     void displayCurrentLocation() const;
     void displayAvailablePaths() const;
+    std::vector<std::string> getAvailablePaths() const;
 
     bool moveToLocation(int choice);
     std::string getCurrentLocation() const;

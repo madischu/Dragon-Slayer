@@ -32,6 +32,11 @@ Inventory& Player::getInventory()
     return inventory;
 }
 
+const Inventory& Player::getInventory() const
+{
+    return inventory;
+}
+
 void Player::setHealth(int newHealth)
 {
     health = newHealth;

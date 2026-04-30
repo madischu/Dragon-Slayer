@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 list(FILTER SOURCES EXCLUDE REGEX "/build/")
+list(FILTER SOURCES EXCLUDE REGEX "/Main Game/Main\\.cpp$")
+list(FILTER SOURCES EXCLUDE REGEX "/GUI/GuiMain\\.cpp$")
 
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 list(FILTER HEADERS EXCLUDE REGEX "/build/")
@@ -18,6 +20,8 @@ foreach(header ${HEADERS})
 endforeach ()
 list(REMOVE_DUPLICATES INCLUDE_DIRS)
 
-add_executable(DragonSlayer ${SOURCES})
+add_executable(DragonSlayer ${SOURCES} "Main Game/Main.cpp")
+add_executable(DragonSlayerGui WIN32 ${SOURCES} "GUI/GuiMain.cpp")
 
 target_include_directories(DragonSlayer PRIVATE ${INCLUDE_DIRS})
+target_include_directories(DragonSlayerGui PRIVATE ${INCLUDE_DIRS})

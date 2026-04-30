@@ -80,6 +80,18 @@ void WorldMap::displayAvailablePaths() const
     }
 }
 
+std::vector<std::string> WorldMap::getAvailablePaths() const
+{
+    std::vector<std::string> paths;
+
+    for (int connectedIndex : locations[currentLocationIndex].connectedLocations)
+    {
+        paths.push_back(locations[connectedIndex].name);
+    }
+
+    return paths;
+}
+
 bool WorldMap::moveToLocation(int choice)
 {
     int pathIndex = choice - 1;

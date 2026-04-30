@@ -23,6 +23,7 @@ public:
     int getGold() const;
     Weapon getCurrentWeapon() const;
     Inventory& getInventory();
+    const Inventory& getInventory() const;
 
     void setHealth(int newHealth);
     void addHealth(int amount);
