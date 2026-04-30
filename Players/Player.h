@@ -3,7 +3,8 @@
 
 #include "Weapon.h"
 #include "Monster.h"
-#include <vector>
+#include "Inventory.h"
+#include <string>
 
 class Player
 {
@@ -11,8 +12,8 @@ private:
     int xp;
     int health;
     int gold;
-    int currentWeaponIndex;
-    std::vector<Weapon> weapons;
+    Weapon equippedWeapon;
+    Inventory inventory;
 
 public:
     Player();
@@ -20,16 +21,20 @@ public:
     int getXP() const;
     int getHealth() const;
     int getGold() const;
-    int getCurrentWeaponIndex() const;
     Weapon getCurrentWeapon() const;
-    std::vector<Weapon>& getWeapons();
+    Inventory& getInventory();
 
     void setHealth(int newHealth);
     void addHealth(int amount);
     void addGold(int amount);
     void subtractGold(int amount);
     void addXP(int amount);
-    void setCurrentWeaponIndex(int index);
+
+    void equipWeapon(const std::string& weaponName);
+    void usePotion(const std::string& potionName);
+    void addItemToInventory(const Item& item);
+    void removeItemFromInventory(const std::string& itemName);
+    void displayInventory() const;
 
     void takeDamage(int damage);
     bool dodge(Monster& monster);

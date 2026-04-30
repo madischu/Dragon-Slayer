@@ -13,6 +13,8 @@ public:
     void buyHealth(Player& player);
     void buyWeapon(Player& player);
     void sellWeapon(Player& player);
+    void buyPotion(Player& player);
+    void buyArmor(Player& player);
 };
 
 #endif

@@ -90,13 +90,11 @@ void CombatSystem::playerAttack(Player& player, Monster& monster)
     std::cout << "Final Damage: " << finalDamage << std::endl;
     std::cout << "*************************" << std::endl;
 
-    std::vector<Weapon>& weapons = player.getWeapons();
-    int currentWeaponIndex = player.getCurrentWeaponIndex();
-
-    if (rand() % 5 == 0 && weapons.size() > 1 && currentWeapon.getName() != "Stick")
+    if (rand() % 5 == 0 && currentWeapon.getName() != "Stick")
     {
         std::cout << "\nYour " << currentWeapon.getName() << " broke!" << std::endl;
-        player.setCurrentWeaponIndex(currentWeaponIndex - 1);
+        player.removeItemFromInventory(currentWeapon.getName());
+        player.equipWeapon("Stick");
         std::cout << "You switched to your " << player.getCurrentWeapon().getName() << "!" << std::endl;
     }
 

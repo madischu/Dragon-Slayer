@@ -1,11 +1,10 @@
 #include "Player.h"
-#include <cstdlib>
 #include <iostream>
+#include <cstdlib>
 
-Player::Player()
-    : xp(0), health(100), gold(25), currentWeaponIndex(0)
+Player::Player() : xp(0), health(100), gold(25), equippedWeapon("Stick", 5, "blunt")
 {
-    weapons.push_back(Weapon("Stick", 5, "blunt"));
+    inventory.addItem(Item("Stick", ItemType::Weapon, 5, "Basic blunt weapon"));
 }
 
 int Player::getXP() const
@@ -23,19 +22,14 @@ int Player::getGold() const
     return gold;
 }
 
-int Player::getCurrentWeaponIndex() const
-{
-    return currentWeaponIndex;
-}
-
 Weapon Player::getCurrentWeapon() const
 {
-    return weapons[currentWeaponIndex];
+    return equippedWeapon;
 }
 
-std::vector<Weapon>& Player::getWeapons()
+Inventory& Player::getInventory()
 {
-    return weapons;
+    return inventory;
 }
 
 void Player::setHealth(int newHealth)
@@ -78,12 +72,77 @@ void Player::addXP(int amount)
     xp += amount;
 }
 
-void Player::setCurrentWeaponIndex(int index)
+void Player::equipWeapon(const std::string& weaponName)
 {
-    if (index >= 0 && index < static_cast<int>(weapons.size()))
+    if (!inventory.containsItem(weaponName))
     {
-        currentWeaponIndex = index;
+        std::cout << "You do not have that item." << std::endl;
+        return;
     }
+
+    Item item = inventory.getItem(weaponName);
+
+    if (item.getType() != ItemType::Weapon)
+    {
+        std::cout << item.getName() << " is not a weapon." << std::endl;
+        return;
+    }
+
+    std::string weaponType = "blunt";
+
+    if (weaponName == "Dagger" || weaponName == "Sword")
+    {
+        weaponType = "sharp";
+    }
+
+    equippedWeapon = Weapon(item.getName(), item.getValue(), weaponType);
+
+    std::cout << "You equipped the " << equippedWeapon.getName() << "." << std::endl;
+}
+
+void Player::usePotion(const std::string& potionName)
+{
+    if (!inventory.containsItem(potionName))
+    {
+        std::cout << "You do not have that potion." << std::endl;
+        return;
+    }
+
+    Item item = inventory.getItem(potionName);
+
+    if (item.getType() != ItemType::Potion)
+    {
+        std::cout << item.getName() << " is not a potion." << std::endl;
+        return;
+    }
+
+    addHealth(item.getValue());
+    inventory.removeItem(potionName);
+
+    std::cout << "You used " << potionName << " and restored "
+              << item.getValue() << " health." << std::endl;
+}
+
+void Player::addItemToInventory(const Item& item)
+{
+    inventory.addItem(item);
+}
+
+void Player::removeItemFromInventory(const std::string& itemName)
+{
+    if (inventory.removeItem(itemName))
+    {
+        std::cout << itemName << " was removed from your inventory." << std::endl;
+    }
+    else
+    {
+        std::cout << itemName << " was not found in your inventory." << std::endl;
+    }
+}
+
+void Player::displayInventory() const
+{
+    inventory.displayInventory();
 }
 
 void Player::takeDamage(int damage)
@@ -107,7 +166,8 @@ bool Player::dodge(Monster& monster)
 
     if (rand() % 100 < dodgeChance)
     {
-        std::cout << "\nYou dodge the attack from the " << monster.getName() << "!\n";
+        std::cout << "\nYou dodge the attack from the "
+                  << monster.getName() << "!\n";
         return true;
     }
 
@@ -173,12 +233,38 @@ int Player::getWeaponEffectiveness(Weapon& weapon, Monster& monster) const
 void Player::defeatMonster(Monster& monster)
 {
     int goldEarned = static_cast<int>(monster.getLevel() * 6.7);
+
     gold += goldEarned;
     xp += monster.getLevel();
 
     std::cout << "You defeated the " << monster.getName() << "!\n" << std::endl;
+
+    if (monster.getName() == "Slime")
+    {
+        inventory.addItem(Item("Slime Gel", ItemType::Treasure, 5, "Can be sold later"));
+        std::cout << "You found Slime Gel." << std::endl;
+    }
+    else if (monster.getName() == "Fanged Beast")
+    {
+        inventory.addItem(Item("Beast Fang", ItemType::Treasure, 15, "A sharp monster trophy"));
+        std::cout << "You found a Beast Fang." << std::endl;
+    }
+    else if (monster.getName() == "Ghoul")
+    {
+        inventory.addItem(Item("Ghoul Bone", ItemType::Treasure, 25, "A rare monster drop"));
+        std::cout << "You found a Ghoul Bone." << std::endl;
+    }
+    else if (monster.getName() == "Dragon")
+    {
+        inventory.addItem(Item("Dragon Scale", ItemType::Treasure, 100, "Proof that you defeated the dragon"));
+        std::cout << "You found a Dragon Scale." << std::endl;
+    }
+
     displayStats();
-    std::cout << "\nYou earned " << goldEarned << " gold and " << monster.getLevel() << " XP." << std::endl;
+
+    std::cout << "\nYou earned " << goldEarned << " gold and "
+              << monster.getLevel() << " XP." << std::endl;
+
     std::cout << "\nLeaving the caves..." << std::endl;
 }
 
@@ -188,6 +274,7 @@ void Player::displayStats() const
     std::cout << "Health: " << health << std::endl;
     std::cout << "Gold: " << gold << std::endl;
     std::cout << "XP: " << xp << std::endl;
-    std::cout << "Current Weapon: " << weapons[currentWeaponIndex].getName() << std::endl;
+    std::cout << "Current Weapon: " << equippedWeapon.getName() << std::endl;
+    std::cout << "Inventory Items: " << inventory.size() << std::endl;
     std::cout << "=========================" << std::endl;
 }
