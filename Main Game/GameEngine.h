@@ -40,6 +40,10 @@ public:
     bool hasPendingWizardEncounter() const;
     std::string interactWithWizard();
     void enterDarkForest();
+    std::string getWizardQuestMenuText() const;
+    std::string acceptWizardQuest();
+    std::string rejectWizardQuest();
+    std::string presentWizardItems();
 
     void addAction(const std::string& action);
     bool travelToPathIndex(int pathChoice, std::string& message);

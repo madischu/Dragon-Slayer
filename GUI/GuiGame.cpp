@@ -93,7 +93,8 @@ public:
         {
             if (engine.hasPendingWizardEncounter())
             {
-                return engine.interactWithWizard();
+                mode = GuiMode::WizardQuest;
+                return engine.interactWithWizard() + "\r\n" + engine.getWizardQuestMenuText();
             }
 
             engine.addAction("Explored the Dark Forest");
@@ -112,7 +113,7 @@ public:
 
     std::string getQuestsText()
     {
-        return "View Quests Here";
+        return "There are no quests available at this time. Try again later.";
     }
 
     std::string getInventoryText()
@@ -407,6 +408,22 @@ public:
         return "Leaving the caves.";
     }
 
+    std::string acceptWizardQuest()
+    {
+        return engine.acceptWizardQuest();
+    }
+
+    std::string rejectWizardQuest()
+    {
+        mode = GuiMode::Main;
+        return engine.rejectWizardQuest();
+    }
+
+    std::string presentWizardItems()
+    {
+        return engine.presentWizardItems();
+    }
+
     std::string getStoreText() const
     {
         return "Would you like to make a purchase?\r\n"
@@ -647,6 +664,21 @@ std::string GuiGame::fightFangedBeast()
 std::string GuiGame::leaveCaves()
 {
     return impl->leaveCaves();
+}
+
+std::string GuiGame::acceptWizardQuest()
+{
+    return impl->acceptWizardQuest();
+}
+
+std::string GuiGame::rejectWizardQuest()
+{
+    return impl->rejectWizardQuest();
+}
+
+std::string GuiGame::presentWizardItems()
+{
+    return impl->presentWizardItems();
 }
 
 std::string GuiGame::getStoreText() const

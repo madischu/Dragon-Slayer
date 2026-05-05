@@ -98,6 +98,26 @@ void GameEngine::enterDarkForest()
     darkForest.enter(*this);
 }
 
+std::string GameEngine::getWizardQuestMenuText() const
+{
+    return darkForest.getQuestMenuText();
+}
+
+std::string GameEngine::acceptWizardQuest()
+{
+    return darkForest.acceptQuest(actionLog);
+}
+
+std::string GameEngine::rejectWizardQuest()
+{
+    return darkForest.rejectQuest(actionLog);
+}
+
+std::string GameEngine::presentWizardItems()
+{
+    return darkForest.presentItems(actionLog);
+}
+
 void GameEngine::addAction(const std::string& action)
 {
     actionLog.push(action);

@@ -148,6 +148,17 @@ namespace
             return;
         }
 
+        if (game.getMode() == GuiMode::WizardQuest)
+        {
+            setButtonLabel(window, IdMap, L"Accept this Quest");
+            setButtonLabel(window, IdInteract, L"Reject this Quest");
+            setButtonLabel(window, IdQuests, L"Present Items");
+            setButtonLabel(window, IdInventory, L"Inventory");
+            setButtonLabel(window, IdLog, L"Action Log");
+            setButtonLabel(window, IdQuit, L"Map");
+            return;
+        }
+
         setButtonLabel(window, IdMap, L"Map");
         setButtonLabel(window, IdInteract, L"Interact");
         setButtonLabel(window, IdQuests, L"Quests");
@@ -773,6 +784,41 @@ namespace
                     break;
                 case IdQuests:
                     setText(outputBox, game.leaveCaves());
+                    break;
+                case IdInventory:
+                    setText(outputBox, game.getInventoryText());
+                    break;
+                case IdLog:
+                    setText(outputBox, game.getLogText());
+                    break;
+                case IdQuit:
+                    isMapVisible = true;
+                    setText(outputBox, "Click a connected location on the map to travel.");
+                    break;
+                default:
+                    break;
+                }
+
+                updateButtonLabels(window);
+                refreshStatus();
+                layoutWindow(window);
+                return 0;
+            }
+
+            if (game.getMode() == GuiMode::WizardQuest)
+            {
+                isMapVisible = false;
+
+                switch (LOWORD(wParam))
+                {
+                case IdMap:
+                    setText(outputBox, game.acceptWizardQuest());
+                    break;
+                case IdInteract:
+                    setText(outputBox, game.rejectWizardQuest());
+                    break;
+                case IdQuests:
+                    setText(outputBox, game.presentWizardItems());
                     break;
                 case IdInventory:
                     setText(outputBox, game.getInventoryText());

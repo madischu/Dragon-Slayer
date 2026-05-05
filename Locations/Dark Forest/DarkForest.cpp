@@ -4,6 +4,28 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <limits>
+
+namespace
+{
+    bool readQuestChoice(int& choice)
+    {
+        if (std::cin >> choice)
+        {
+            return true;
+        }
+
+        if (std::cin.eof())
+        {
+            return false;
+        }
+
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        ConsoleColor::printLine("Invalid input. Please enter a number.", ConsoleColor::Color::White);
+        return false;
+    }
+}
 
 DarkForest::DarkForest()
 {
@@ -48,6 +70,32 @@ std::string DarkForest::interactWithWizard(Player& player, ActionStack& actionLo
     return "A robed wizard steps out from shadows. He is no enemy, he would like to send you on a quest.";
 }
 
+std::string DarkForest::getQuestMenuText() const
+{
+    return
+        "\n1: Accept this Quest\n"
+        "2: Reject this Quest\n"
+        "3: Present Items";
+}
+
+std::string DarkForest::acceptQuest(ActionStack& actionLog)
+{
+    actionLog.push("Accepted the wizard quest prompt");
+    return "\nQuests coming soon! There are no quests available at this time. Try again later.";
+}
+
+std::string DarkForest::rejectQuest(ActionStack& actionLog)
+{
+    actionLog.push("Rejected the wizard quest prompt");
+    return "\nThe wizard nods, bids you farewell, and retreats back into the shadows.";
+}
+
+std::string DarkForest::presentItems(ActionStack& actionLog)
+{
+    actionLog.push("Presented items to the wizard");
+    return "\nFeature Coming soon!";
+}
+
 void DarkForest::clearEncounter()
 {
     pendingWizardEncounter = false;
@@ -58,7 +106,36 @@ void DarkForest::enter(GameEngine& engine)
     if (hasPendingWizardEncounter(engine.getCurrentLocation()))
     {
         ConsoleColor::printLine("\n" + interactWithWizard(engine.getPlayer(), engine.getActionLog(), engine.getCurrentLocation()), ConsoleColor::Color::DarkGreen);
-        return;
+
+        while (true)
+        {
+            ConsoleColor::printLine(getQuestMenuText(), ConsoleColor::Color::White);
+
+            int choice;
+            if (!readQuestChoice(choice))
+            {
+                return;
+            }
+
+            if (choice == 1)
+            {
+                ConsoleColor::printLine(acceptQuest(engine.getActionLog()), ConsoleColor::Color::DarkGreen);
+            }
+            else if (choice == 2)
+            {
+                ConsoleColor::printLine(rejectQuest(engine.getActionLog()), ConsoleColor::Color::DarkGreen);
+                return;
+            }
+            else if (choice == 3)
+            {
+                ConsoleColor::printLine(presentItems(engine.getActionLog()), ConsoleColor::Color::DarkGreen);
+            }
+            else
+            {
+                ConsoleColor::printLine("Invalid choice.", ConsoleColor::Color::White);
+                engine.addAction("Entered invalid wizard quest choice");
+            }
+        }
     }
 
     ConsoleColor::printLine("\nYou are in the Dark Forest. It is quiet here.", ConsoleColor::Color::DarkGreen);

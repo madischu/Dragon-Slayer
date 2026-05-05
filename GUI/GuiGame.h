@@ -11,7 +11,8 @@ enum class GuiMode
     Main,
     Store,
     Combat,
-    CaveChoice
+    CaveChoice,
+    WizardQuest
 };
 
 class GuiGameImpl;
@@ -48,6 +49,9 @@ public:
     std::string fightSlime();
     std::string fightFangedBeast();
     std::string leaveCaves();
+    std::string acceptWizardQuest();
+    std::string rejectWizardQuest();
+    std::string presentWizardItems();
 
     std::string getStoreText() const;
     std::string getCombatText() const;
