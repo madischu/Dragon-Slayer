@@ -2,6 +2,7 @@
 #define ACTIONSTACK_H
 
 #include <string>
+#include <vector>
 
 class ActionStack
 {
@@ -31,6 +32,8 @@ public:
 
     bool isEmpty() const;
     int size() const;
+    std::vector<std::string> getRecentActions() const;
+    std::string getLogText() const;
     void displayRecentActions() const;
     void clear();
 };

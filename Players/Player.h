@@ -22,6 +22,7 @@ public:
     int getHealth() const;
     int getGold() const;
     Weapon getCurrentWeapon() const;
+    std::string getStatsText() const;
     Inventory& getInventory();
     const Inventory& getInventory() const;
 

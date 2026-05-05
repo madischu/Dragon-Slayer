@@ -7,7 +7,7 @@
 class CombatSystem
 {
 public:
-    static bool fight(Player& player, Monster& monster, bool canRunAway);
+    static bool fight(Player& player, Monster& monster, bool canRunAway, bool canWeaponBreak = true);
     static void playerAttack(Player& player, Monster& monster);
 };
 

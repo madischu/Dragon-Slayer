@@ -125,12 +125,29 @@ bool WorldMap::moveToLocation(int choice)
 
     currentLocationIndex = locations[currentLocationIndex].connectedLocations[pathIndex];
 
-    std::cout << "\nYou travel to "
-              << locations[currentLocationIndex].name
-              << "."
-              << std::endl;
-
     return true;
+}
+
+bool WorldMap::moveToLocationByName(const std::string& locationName, std::string& message)
+{
+    for (int i = 0; i < static_cast<int>(locations[currentLocationIndex].connectedLocations.size()); ++i)
+    {
+        int connectedIndex = locations[currentLocationIndex].connectedLocations[i];
+
+        if (locations[connectedIndex].name == locationName)
+        {
+            return moveToLocation(i + 1);
+        }
+    }
+
+    if (locationName == getCurrentLocation())
+    {
+        message = "You are already at " + locationName + ".";
+        return false;
+    }
+
+    message = "You cannot travel directly to " + locationName + " from here.";
+    return false;
 }
 
 std::string WorldMap::getCurrentLocation() const

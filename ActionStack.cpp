@@ -1,5 +1,6 @@
 ﻿#include "ActionStack.h"
 #include <iostream>
+#include <sstream>
 
 ActionStack::ActionStack()
 {
@@ -60,26 +61,44 @@ int ActionStack::size() const
     return count;
 }
 
-void ActionStack::displayRecentActions() const
+std::vector<std::string> ActionStack::getRecentActions() const
 {
-    if (isEmpty())
-    {
-        std::cout << "No recent actions." << std::endl;
-        return;
-    }
-
-    std::cout << "\nRecent Actions:" << std::endl;
-
+    std::vector<std::string> actions;
     Node* current = top;
-    int index = 1;
 
     while (current != nullptr)
     {
-        std::cout << index << ". " << current->action << std::endl;
-
+        actions.push_back(current->action);
         current = current->next;
-        index++;
     }
+
+    return actions;
+}
+
+std::string ActionStack::getLogText() const
+{
+    if (isEmpty())
+    {
+        return "No recent actions.";
+    }
+
+    std::ostringstream output;
+    output << "\nRecent Actions:\n";
+
+    Node* current = top;
+
+    while (current != nullptr)
+    {
+        output << "- " << current->action << "\n";
+        current = current->next;
+    }
+
+    return output.str();
+}
+
+void ActionStack::displayRecentActions() const
+{
+    std::cout << getLogText() << std::endl;
 }
 
 void ActionStack::clear()

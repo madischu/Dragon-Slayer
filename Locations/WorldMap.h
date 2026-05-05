@@ -37,6 +37,7 @@ public:
     std::vector<std::pair<std::string, std::string>> getAllPaths() const;
 
     bool moveToLocation(int choice);
+    bool moveToLocationByName(const std::string& locationName, std::string& message);
     std::string getCurrentLocation() const;
 };
 

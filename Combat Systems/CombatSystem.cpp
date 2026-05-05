@@ -2,8 +2,15 @@
 #include <cstdlib>
 #include <iostream>
 
-bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway)
+namespace
 {
+    bool weaponBreaksEnabled = true;
+}
+
+bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway, bool canWeaponBreak)
+{
+    weaponBreaksEnabled = canWeaponBreak;
+
     std::cout << "\nYou are fighting a " << monster.getName() << "." << std::endl;
     std::cout << "Monster Health: " << monster.getHealth() << "\n" << std::endl;
 
@@ -11,7 +18,8 @@ bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway)
     {
         std::cout << "1: Attack" << std::endl;
         std::cout << "2: Dodge" << std::endl;
-        std::cout << "3: Run Away" << std::endl;
+        std::cout << "3: Use Health Potion" << std::endl;
+        std::cout << "4: Run Away" << std::endl;
 
         int action;
         std::cin >> action;
@@ -34,14 +42,18 @@ bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway)
         }
         else if (action == 3)
         {
+            player.usePotion("Health Potion");
+        }
+        else if (action == 4)
+        {
             if (canRunAway)
             {
                 std::cout << "\nYou run away from the battle!" << std::endl;
-                std::cout << "\nLeaving the caves..." << std::endl;
+                weaponBreaksEnabled = true;
                 return false;
             }
 
-            std::cout << "You cannot run away from the Dragon's Lair!" << std::endl;
+            std::cout << "You cannot run away from this battle!" << std::endl;
         }
         else
         {
@@ -49,7 +61,9 @@ bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway)
         }
     }
 
-    return monster.getHealth() <= 0;
+    bool defeatedMonster = monster.getHealth() <= 0;
+    weaponBreaksEnabled = true;
+    return defeatedMonster;
 }
 
 void CombatSystem::playerAttack(Player& player, Monster& monster)
@@ -90,7 +104,7 @@ void CombatSystem::playerAttack(Player& player, Monster& monster)
     std::cout << "Final Damage: " << finalDamage << std::endl;
     std::cout << "*************************" << std::endl;
 
-    if (rand() % 5 == 0 && currentWeapon.getName() != "Stick")
+    if (weaponBreaksEnabled && rand() % 5 == 0 && currentWeapon.getName() != "Stick")
     {
         std::cout << "\nYour " << currentWeapon.getName() << " broke!" << std::endl;
         player.removeItemFromInventory(currentWeapon.getName());

@@ -1,6 +1,8 @@
 #include "GuiGame.h"
 
 #include <array>
+#include <cstdlib>
+#include <ctime>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -80,7 +82,20 @@ namespace
 
     void setText(HWND handle, const std::string& text)
     {
-        std::wstring wideText = widen(text);
+        std::string normalizedText;
+        normalizedText.reserve(text.size());
+
+        for (char character : text)
+        {
+            if (character == '\n' && (normalizedText.empty() || normalizedText.back() != '\r'))
+            {
+                normalizedText += '\r';
+            }
+
+            normalizedText += character;
+        }
+
+        std::wstring wideText = widen(normalizedText);
         SetWindowTextW(handle, wideText.c_str());
     }
 
@@ -119,6 +134,17 @@ namespace
             setButtonLabel(window, IdInventory, L"Run Away");
             setButtonLabel(window, IdLog, L"Inventory");
             setButtonLabel(window, IdQuit, L"Action Log");
+            return;
+        }
+
+        if (game.getMode() == GuiMode::CaveChoice)
+        {
+            setButtonLabel(window, IdMap, L"Slime");
+            setButtonLabel(window, IdInteract, L"Fanged Beast");
+            setButtonLabel(window, IdQuests, L"Leave Caves");
+            setButtonLabel(window, IdInventory, L"Inventory");
+            setButtonLabel(window, IdLog, L"Action Log");
+            setButtonLabel(window, IdQuit, L"Map");
             return;
         }
 
@@ -733,6 +759,41 @@ namespace
                 return 0;
             }
 
+            if (game.getMode() == GuiMode::CaveChoice)
+            {
+                isMapVisible = false;
+
+                switch (LOWORD(wParam))
+                {
+                case IdMap:
+                    setText(outputBox, game.fightSlime());
+                    break;
+                case IdInteract:
+                    setText(outputBox, game.fightFangedBeast());
+                    break;
+                case IdQuests:
+                    setText(outputBox, game.leaveCaves());
+                    break;
+                case IdInventory:
+                    setText(outputBox, game.getInventoryText());
+                    break;
+                case IdLog:
+                    setText(outputBox, game.getLogText());
+                    break;
+                case IdQuit:
+                    isMapVisible = true;
+                    setText(outputBox, "Click a connected location on the map to travel.");
+                    break;
+                default:
+                    break;
+                }
+
+                updateButtonLabels(window);
+                refreshStatus();
+                layoutWindow(window);
+                return 0;
+            }
+
             switch (LOWORD(wParam))
             {
             case IdMap:
@@ -789,6 +850,8 @@ namespace
 
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int showCommand)
 {
+    srand(static_cast<unsigned int>(time(nullptr)));
+
     const wchar_t windowClassName[] = L"DragonSlayerGuiWindow";
     const wchar_t mapClassName[] = L"DragonSlayerMapView";
     const wchar_t outputClassName[] = L"DragonSlayerOutputView";

@@ -1,6 +1,8 @@
 #include "Player.h"
+#include "../Main Game/ConsoleColor.h"
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
 
 Player::Player() : xp(0), health(100), gold(25), equippedWeapon("Stick", 5, "blunt")
 {
@@ -25,6 +27,19 @@ int Player::getGold() const
 Weapon Player::getCurrentWeapon() const
 {
     return equippedWeapon;
+}
+
+std::string Player::getStatsText() const
+{
+    std::ostringstream output;
+    output << "=========================" << std::endl;
+    output << "Health: " << health << std::endl;
+    output << "Gold: " << gold << std::endl;
+    output << "XP: " << xp << std::endl;
+    output << "Current Weapon: " << equippedWeapon.getName() << std::endl;
+    output << "Inventory Items: " << inventory.size() << std::endl;
+    output << "=========================";
+    return output.str();
 }
 
 Inventory& Player::getInventory()
@@ -275,11 +290,5 @@ void Player::defeatMonster(Monster& monster)
 
 void Player::displayStats() const
 {
-    std::cout << "=========================" << std::endl;
-    std::cout << "Health: " << health << std::endl;
-    std::cout << "Gold: " << gold << std::endl;
-    std::cout << "XP: " << xp << std::endl;
-    std::cout << "Current Weapon: " << equippedWeapon.getName() << std::endl;
-    std::cout << "Inventory Items: " << inventory.size() << std::endl;
-    std::cout << "=========================" << std::endl;
+    ConsoleColor::printLine(getStatsText(), ConsoleColor::Color::DarkYellow);
 }

@@ -2,6 +2,7 @@
 #define ENEMYQUEUE_H
 
 #include "Monster.h"
+#include "Weapon.h"
 
 class EnemyQueue
 {
@@ -34,8 +35,7 @@ public:
     void clear();
 
     void buildCaveWave();
-    void buildForestWave();
-    void buildRuinsWave();
+    void buildCaveWaveForWeapon(const Weapon& weapon);
 };
 
 #endif
