@@ -1,10 +1,9 @@
 #include "GuiGame.h"
 
-#include "ActionStack.h"
+#include "../Main Game/GameEngine.h"
 #include "Monster.h"
-#include "Player.h"
-#include "WorldMap.h"
 
+#include <cstdlib>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -15,20 +14,12 @@ class GuiGameImpl
 public:
     GuiGameImpl()
     {
-        worldMap.buildDefaultMap();
-        addAction("Started a new game");
+        engine.addAction("Started a new game");
     }
 
     std::string getStatusText() const
     {
-        std::ostringstream output;
-        output << "    Location: " << worldMap.getCurrentLocation()
-               << "    Health: " << player.getHealth()
-               << "    Gold: " << player.getGold()
-               << "    XP: " << player.getXP()
-               << "    Weapon: " << player.getCurrentWeapon().getName()
-               << "    Items: " << player.getInventory().size();
-        return output.str();
+        return engine.getStatusLine();
     }
 
     GuiMode getMode() const
@@ -38,61 +29,38 @@ public:
 
     std::string getCurrentLocation() const
     {
-        return worldMap.getCurrentLocation();
+        return engine.getCurrentLocation();
     }
 
     std::vector<std::string> getAvailablePaths() const
     {
-        return worldMap.getAvailablePaths();
+        return engine.getAvailablePaths();
     }
 
     std::vector<std::pair<std::string, std::string>> getMapPaths() const
     {
-        return worldMap.getAllPaths();
+        return engine.getMapPaths();
     }
 
     bool travelToLocation(const std::string& locationName, std::string& message)
     {
-        std::vector<std::string> availablePaths = worldMap.getAvailablePaths();
-
-        for (int i = 0; i < static_cast<int>(availablePaths.size()); ++i)
-        {
-            if (availablePaths[i] == locationName)
-            {
-                std::string previousLocation = worldMap.getCurrentLocation();
-                worldMap.moveToLocation(i + 1);
-                std::string newLocation = worldMap.getCurrentLocation();
-
-                addAction("Moved from " + previousLocation + " to " + newLocation);
-                message = "Traveled to " + newLocation + ".";
-                return true;
-            }
-        }
-
-        if (locationName == worldMap.getCurrentLocation())
-        {
-            message = "You are already at " + locationName + ".";
-            return false;
-        }
-
-        message = "You cannot travel directly to " + locationName + " from here.";
-        return false;
+        return engine.travelToLocation(locationName, message);
     }
 
     std::string interact()
     {
-        std::string location = worldMap.getCurrentLocation();
+        std::string location = engine.getCurrentLocation();
 
         if (location == "Town Square")
         {
-            addAction("Visited Town Square");
+            engine.addAction("Visited Town Square");
             return "You are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'.";
         }
 
         if (location == "Store")
         {
             mode = GuiMode::Store;
-            addAction("Visited Store");
+            engine.addAction("Visited Store");
             return getStoreText();
         }
 
@@ -108,146 +76,112 @@ public:
 
         if (location == "Caves")
         {
-            std::vector<Monster> monsters =
+            if ((rand() % 100) >= 25)
             {
-                Monster("Slime", 2, 15, "blunt"),
-                Monster("Fanged Beast", 8, 60, "sharp")
-            };
+                mode = GuiMode::CaveChoice;
+                engine.addAction("Entered the caves");
+                return getCaveChoiceText();
+            }
+
+            std::vector<Monster> monsters =
+                buildCaveWaveForCurrentWeapon();
 
             return startCombat(monsters, "Started a cave enemy wave");
         }
 
         if (location == "Dark Forest")
         {
-            std::vector<Monster> monsters =
+            if (engine.hasPendingWizardEncounter())
             {
-                Monster("Slime", 2, 15, "blunt"),
-                Monster("Fanged Beast", 8, 60, "sharp"),
-                Monster("Ghoul", 20, 150, "blunt")
-            };
+                mode = GuiMode::WizardQuest;
+                return engine.interactWithWizard() + "\r\n" + engine.getWizardQuestMenuText();
+            }
 
-            return startCombat(monsters, "Started a forest enemy wave");
+            engine.addAction("Explored the Dark Forest");
+            return "You are in the Dark Forest. It is quiet here.";
         }
 
         if (location == "Ancient Ruins")
         {
-            std::vector<Monster> monsters =
-            {
-                Monster("Fanged Beast", 8, 60, "sharp"),
-                Monster("Ghoul", 20, 150, "blunt")
-            };
-
-            return startCombat(monsters, "Started a ruins enemy wave");
+            engine.addAction("Explored the Ancient Ruins");
+            return "You explore the Ancient Ruins. There are no enemies here.";
         }
 
-        addAction("Explored " + location + " from GUI");
+        engine.addAction("Explored " + location + " from GUI");
         return "There is nothing else to do here right now.";
     }
 
     std::string getQuestsText()
     {
-        return "View Quests Here";
+        return "There are no quests available at this time. Try again later.";
     }
 
     std::string getInventoryText()
     {
-        std::ostringstream output;
-        output << "Inventory\r\n";
-
-        std::vector<std::string> knownItems =
-        {
-            "Stick",
-            "Dagger",
-            "Claw Hammer",
-            "Sword",
-            "Health Potion",
-            "Leather Armor",
-            "Slime Gel",
-            "Beast Fang",
-            "Ghoul Bone",
-            "Dragon Scale"
-        };
-
-        bool foundItem = false;
-
-        for (const std::string& itemName : knownItems)
-        {
-            if (player.getInventory().containsItem(itemName))
-            {
-                output << "- " << itemName << "\r\n";
-                foundItem = true;
-            }
-        }
-
-        if (!foundItem)
-        {
-            output << "No items.";
-        }
-
-        return output.str();
+        return engine.getInventoryText();
     }
 
     std::string buyHealth()
     {
-        if (player.getHealth() == 300)
+        if (engine.getPlayer().getHealth() == 300)
         {
             return getStoreText("Your health is already at the maximum.");
         }
 
-        if (player.getGold() < 10)
+        if (engine.getPlayer().getGold() < 10)
         {
             return getStoreText("Not enough gold.");
         }
 
-        player.subtractGold(10);
-        player.addHealth(10);
-        addAction("Bought 10 health");
+        engine.getPlayer().subtractGold(10);
+        engine.getPlayer().addHealth(10);
+        engine.addAction("Bought 10 health");
         return getStoreText("You bought 10 health.");
     }
 
     std::string buyWeapon()
     {
-        Inventory& inventory = player.getInventory();
+        Inventory& inventory = engine.getPlayer().getInventory();
 
-        if (player.getGold() < 30)
+        if (engine.getPlayer().getGold() < 30)
         {
             return getStoreText("Not enough gold.");
         }
 
         if (!inventory.containsItem("Dagger"))
         {
-            player.subtractGold(30);
+            engine.getPlayer().subtractGold(30);
             inventory.addItem(Item("Dagger", ItemType::Weapon, 30, "Sharp starter weapon"));
-            player.equipWeapon("Dagger");
-            addAction("Bought Dagger");
+            engine.getPlayer().equipWeapon("Dagger");
+            engine.addAction("Bought Dagger");
             return getStoreText("You bought and equipped the Dagger.");
         }
 
         if (!inventory.containsItem("Claw Hammer"))
         {
-                if (player.getXP() < 50)
+                if (engine.getPlayer().getXP() < 50)
                 {
                     return getStoreText("You need at least 50 XP to purchase the Claw Hammer.");
                 }
 
-            player.subtractGold(30);
+            engine.getPlayer().subtractGold(30);
             inventory.addItem(Item("Claw Hammer", ItemType::Weapon, 50, "Strong blunt weapon"));
-                player.equipWeapon("Claw Hammer");
-                addAction("Bought Claw Hammer");
+                engine.getPlayer().equipWeapon("Claw Hammer");
+                engine.addAction("Bought Claw Hammer");
                 return getStoreText("You bought and equipped the Claw Hammer.");
             }
 
         if (!inventory.containsItem("Sword"))
         {
-                if (player.getXP() < 150)
+                if (engine.getPlayer().getXP() < 150)
                 {
                     return getStoreText("You need at least 150 XP to purchase the Sword.");
                 }
 
-            player.subtractGold(30);
+            engine.getPlayer().subtractGold(30);
             inventory.addItem(Item("Sword", ItemType::Weapon, 100, "Required to defeat the Dragon"));
-                player.equipWeapon("Sword");
-                addAction("Bought Sword");
+                engine.getPlayer().equipWeapon("Sword");
+                engine.addAction("Bought Sword");
                 return getStoreText("You bought and equipped the Sword.");
             }
 
@@ -256,8 +190,8 @@ public:
 
     std::string sellWeapon()
     {
-        Inventory& inventory = player.getInventory();
-        Weapon currentWeapon = player.getCurrentWeapon();
+        Inventory& inventory = engine.getPlayer().getInventory();
+        Weapon currentWeapon = engine.getPlayer().getCurrentWeapon();
 
         if (currentWeapon.getName() == "Stick")
         {
@@ -269,49 +203,49 @@ public:
             return getStoreText("Could not sell weapon.");
         }
 
-        player.addGold(15);
-        player.equipWeapon("Stick");
-        addAction("Sold " + currentWeapon.getName());
+        engine.getPlayer().addGold(15);
+        engine.getPlayer().equipWeapon("Stick");
+        engine.addAction("Sold " + currentWeapon.getName());
         return getStoreText("You sold your " + currentWeapon.getName() + ".");
     }
 
     std::string buyPotion()
     {
-        if (player.getGold() < 15)
+        if (engine.getPlayer().getGold() < 15)
         {
             return getStoreText("Not enough gold.");
         }
 
-        player.subtractGold(15);
-        player.addItemToInventory(Item("Health Potion", ItemType::Potion, 50, "Restores 50 health"));
-        addAction("Bought Health Potion");
+        engine.getPlayer().subtractGold(15);
+        engine.getPlayer().addItemToInventory(Item("Health Potion", ItemType::Potion, 50, "Restores 50 health"));
+        engine.addAction("Bought Health Potion");
         return getStoreText("You bought a Health Potion.");
     }
 
     std::string buyArmor()
     {
-        Inventory& inventory = player.getInventory();
+        Inventory& inventory = engine.getPlayer().getInventory();
 
         if (inventory.containsItem("Leather Armor"))
         {
             return getStoreText("You already own Leather Armor.");
         }
 
-        if (player.getGold() < 40)
+        if (engine.getPlayer().getGold() < 40)
         {
             return getStoreText("Not enough gold.");
         }
 
-        player.subtractGold(40);
-        player.addItemToInventory(Item("Leather Armor", ItemType::Armor, 10, "Basic armor"));
-        addAction("Bought Leather Armor");
+        engine.getPlayer().subtractGold(40);
+        engine.getPlayer().addItemToInventory(Item("Leather Armor", ItemType::Armor, 10, "Basic armor"));
+        engine.addAction("Bought Leather Armor");
         return getStoreText("You bought Leather Armor.");
     }
 
     std::string leaveStore()
     {
         mode = GuiMode::Main;
-        addAction("Left Store");
+        engine.addAction("Left Store");
         return "Leaving the store.";
     }
 
@@ -325,18 +259,18 @@ public:
 
         Monster& monster = combatMonsters[combatIndex];
 
-        if (!player.canFightMonster(monster))
+        if (!engine.getPlayer().canFightMonster(monster))
         {
-            addAction("Could not fight " + monster.getName() + " because XP was too low");
+            engine.addAction("Could not fight " + monster.getName() + " because XP was too low");
             mode = GuiMode::Main;
             return "You are not strong enough to fight the " + monster.getName() + ".";
         }
 
-        Weapon currentWeapon = player.getCurrentWeapon();
-        int bonus = player.getXP() / 10;
+        Weapon currentWeapon = engine.getPlayer().getCurrentWeapon();
+        int bonus = engine.getPlayer().getXP() / 10;
         int baseDamage = currentWeapon.getPower();
         int totalDamage = baseDamage + bonus;
-        int effectiveness = player.getWeaponEffectiveness(currentWeapon, monster);
+        int effectiveness = engine.getPlayer().getWeaponEffectiveness(currentWeapon, monster);
         int finalDamage = 0;
 
         if (baseDamage > 0)
@@ -347,23 +281,23 @@ public:
         std::ostringstream output;
         output << "You are fighting a " << monster.getName() << ".\r\n";
 
-        if (player.isMonsterHit())
+        if (engine.getPlayer().isMonsterHit())
         {
             monster.takeDamage(finalDamage, currentWeapon.getType());
             output << "You attacked with " << currentWeapon.getName()
                    << " and dealt " << finalDamage << " damage.\r\n";
-            addAction("Attacked " + monster.getName() + " with " + currentWeapon.getName());
+            engine.addAction("Attacked " + monster.getName() + " with " + currentWeapon.getName());
         }
         else
         {
             output << "You missed.\r\n";
-            addAction("Missed an attack against " + monster.getName());
+            engine.addAction("Missed an attack against " + monster.getName());
         }
 
         if (monster.getHealth() <= 0)
         {
-            player.defeatMonster(monster);
-            addAction("Defeated " + monster.getName());
+            engine.getPlayer().defeatMonster(monster);
+            engine.addAction("Defeated " + monster.getName());
             output << "You defeated the " << monster.getName() << ".\r\n";
             return advanceCombat(output.str());
         }
@@ -384,9 +318,9 @@ public:
         Monster& monster = combatMonsters[combatIndex];
         std::ostringstream output;
 
-        if (player.dodge(monster))
+        if (engine.getPlayer().dodge(monster))
         {
-            addAction("Dodged " + monster.getName());
+            engine.addAction("Dodged " + monster.getName());
             output << "You dodged the " << monster.getName() << ".";
         }
         else
@@ -401,13 +335,13 @@ public:
 
     std::string useHealthPotion()
     {
-        if (!player.getInventory().containsItem("Health Potion"))
+        if (!engine.getPlayer().getInventory().containsItem("Health Potion"))
         {
             return "You do not have that potion.";
         }
 
-        player.usePotion("Health Potion");
-        addAction("Used Health Potion");
+        engine.getPlayer().usePotion("Health Potion");
+        engine.addAction("Used Health Potion");
 
         if (mode == GuiMode::Combat)
         {
@@ -429,8 +363,65 @@ public:
         mode = GuiMode::Main;
         combatMonsters.clear();
         combatIndex = 0;
-        addAction("Ran away from " + monsterName);
+        engine.addAction("Ran away from " + monsterName);
         return "You ran away from the battle.";
+    }
+
+    std::string fightSlime()
+    {
+        if (mode != GuiMode::CaveChoice)
+        {
+            return "There is no cave enemy to choose right now.";
+        }
+
+        std::vector<Monster> monsters =
+        {
+            Monster("Slime", 2, 15, "blunt")
+        };
+
+        return startCombat(monsters, "Chose to fight Slime in the caves");
+    }
+
+    std::string fightFangedBeast()
+    {
+        if (mode != GuiMode::CaveChoice)
+        {
+            return "There is no cave enemy to choose right now.";
+        }
+
+        std::vector<Monster> monsters =
+        {
+            Monster("Fanged Beast", 8, 60, "sharp")
+        };
+
+        return startCombat(monsters, "Chose to fight Fanged Beast in the caves");
+    }
+
+    std::string leaveCaves()
+    {
+        if (mode == GuiMode::CaveChoice)
+        {
+            mode = GuiMode::Main;
+            engine.addAction("Left the caves without fighting");
+        }
+
+        return "Leaving the caves.";
+    }
+
+    std::string acceptWizardQuest()
+    {
+        return engine.acceptWizardQuest();
+    }
+
+    std::string rejectWizardQuest()
+    {
+        mode = GuiMode::Main;
+        return engine.rejectWizardQuest();
+    }
+
+    std::string presentWizardItems()
+    {
+        return engine.presentWizardItems();
     }
 
     std::string getStoreText() const
@@ -458,33 +449,21 @@ public:
         return output.str();
     }
 
+    std::string getCaveChoiceText() const
+    {
+        return "Choose a cave enemy to fight.";
+    }
+
     std::string getLogText() const
     {
-        std::ostringstream output;
-        output << "Recent Actions\r\n";
-
-        for (int i = static_cast<int>(actions.size()) - 1; i >= 0; --i)
-        {
-            output << "- " << actions[i] << "\r\n";
-        }
-
-        return output.str();
+        return engine.getLogText();
     }
 
 private:
-    Player player;
-    WorldMap worldMap;
-    ActionStack actionLog;
-    std::vector<std::string> actions;
+    GameEngine engine;
     GuiMode mode = GuiMode::Main;
     std::vector<Monster> combatMonsters;
     int combatIndex = 0;
-
-    void addAction(const std::string& action)
-    {
-        actionLog.push(action);
-        actions.push_back(action);
-    }
 
     std::string getStoreText(const std::string& message) const
     {
@@ -496,7 +475,7 @@ private:
         combatMonsters = monsters;
         combatIndex = 0;
         mode = GuiMode::Combat;
-        addAction(action);
+        engine.addAction(action);
 
         if (combatMonsters.empty())
         {
@@ -504,26 +483,44 @@ private:
             return "There are no enemies here.";
         }
 
-        addAction("Encountered " + combatMonsters[combatIndex].getName());
+        engine.addAction("Encountered " + combatMonsters[combatIndex].getName());
         return "Enemy wave started.\r\n" + getCombatText();
+    }
+
+    std::vector<Monster> buildCaveWaveForCurrentWeapon() const
+    {
+        std::vector<Monster> monsters;
+
+        if (engine.getPlayer().getCurrentWeapon().getType() == "sharp")
+        {
+            monsters.push_back(Monster("Fanged Beast", 8, 60, "sharp"));
+            monsters.push_back(Monster("Fanged Beast", 8, 60, "sharp"));
+        }
+        else
+        {
+            monsters.push_back(Monster("Slime", 2, 15, "blunt"));
+            monsters.push_back(Monster("Slime", 2, 15, "blunt"));
+        }
+
+        return monsters;
     }
 
     std::string monsterAttack(Monster& monster)
     {
         int damage = monster.attack();
-        player.takeDamage(damage);
-        addAction(monster.getName() + " attacked the player");
+        engine.getPlayer().takeDamage(damage);
+        engine.addAction(monster.getName() + " attacked the player");
 
         std::ostringstream output;
         output << "The " << monster.getName() << " attacked for " << damage
-               << " damage. Current health: " << player.getHealth() << ".";
+               << " damage. Current health: " << engine.getPlayer().getHealth() << ".";
 
-        if (player.getHealth() <= 0)
+        if (engine.getPlayer().getHealth() <= 0)
         {
             mode = GuiMode::Main;
             combatMonsters.clear();
             combatIndex = 0;
-            addAction("Player lost the game");
+            engine.addAction("Player lost the game");
             output << "\r\nYou have been defeated.";
         }
 
@@ -539,11 +536,11 @@ private:
             mode = GuiMode::Main;
             combatMonsters.clear();
             combatIndex = 0;
-            addAction("Completed an enemy wave");
+            engine.addAction("Completed an enemy wave");
             return previousMessage + "You survived the enemy wave.";
         }
 
-        addAction("Encountered " + combatMonsters[combatIndex].getName());
+        engine.addAction("Encountered " + combatMonsters[combatIndex].getName());
         return previousMessage + "Next enemy: " + combatMonsters[combatIndex].getName() + ".\r\n" + getCombatText();
     }
 };
@@ -654,6 +651,36 @@ std::string GuiGame::runFromCombat()
     return impl->runFromCombat();
 }
 
+std::string GuiGame::fightSlime()
+{
+    return impl->fightSlime();
+}
+
+std::string GuiGame::fightFangedBeast()
+{
+    return impl->fightFangedBeast();
+}
+
+std::string GuiGame::leaveCaves()
+{
+    return impl->leaveCaves();
+}
+
+std::string GuiGame::acceptWizardQuest()
+{
+    return impl->acceptWizardQuest();
+}
+
+std::string GuiGame::rejectWizardQuest()
+{
+    return impl->rejectWizardQuest();
+}
+
+std::string GuiGame::presentWizardItems()
+{
+    return impl->presentWizardItems();
+}
+
 std::string GuiGame::getStoreText() const
 {
     return impl->getStoreText();
@@ -663,3 +690,5 @@ std::string GuiGame::getCombatText() const
 {
     return impl->getCombatText();
 }
+
+

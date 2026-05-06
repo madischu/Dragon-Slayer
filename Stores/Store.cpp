@@ -1,21 +1,31 @@
 #include "Store.h"
+#include "../Main Game/ConsoleColor.h"
+#include "../Main Game/ConsoleInput.h"
 #include <iostream>
+#include <string>
 
-Store::Store() : Location("Store", "You enter the store. Would you like to make a purchase?")
+Store::Store()
 {
 }
 
-void Store::enter(Player& player)
+namespace
 {
-    Location::enter();
+    void printStoreLine(const std::string& message)
+    {
+        ConsoleColor::printLine(message, ConsoleColor::Color::LightBrown);
+    }
+}
 
-    std::cout << "\nYou enter the store.\n" << std::endl;
+void Store::enter(Player& player, ActionStack& actionLog)
+{
+    printStoreLine("\nYou enter the store.\n");
 
     while (true)
     {
         player.displayStats();
 
-        std::cout << "\nWhat would you like to do?\n" << std::endl;
+        ConsoleColor::printLine("\nWhat would you like to do?\n", ConsoleColor::Color::LightBrown);
+
         std::cout << "1: Buy Health (+10 HP for -10 gold)" << std::endl;
         std::cout << "2: Buy Weapon (-30 gold)" << std::endl;
         std::cout << "3: Sell Equipped Weapon (+15 gold)" << std::endl;
@@ -26,53 +36,62 @@ void Store::enter(Player& player)
         std::cout << "8: Leave Store" << std::endl;
 
         int choice;
-        std::cin >> choice;
+        if (!ConsoleInput::readInt(choice))
+        {
+            return;
+        }
 
         if (choice == 1)
         {
-            buyHealth(player);
+            buyHealth(player, actionLog);
         }
         else if (choice == 2)
         {
-            buyWeapon(player);
+            buyWeapon(player, actionLog);
         }
         else if (choice == 3)
         {
-            sellWeapon(player);
+            sellWeapon(player, actionLog);
         }
         else if (choice == 4)
         {
-            buyPotion(player);
+            buyPotion(player, actionLog);
         }
         else if (choice == 5)
         {
-            buyArmor(player);
+            buyArmor(player, actionLog);
         }
         else if (choice == 6)
         {
             player.displayInventory();
+            actionLog.push("Viewed inventory in Store");
         }
         else if (choice == 7)
         {
+            bool hasPotion = player.getInventory().containsItem("Health Potion");
             player.usePotion("Health Potion");
+            actionLog.push(hasPotion ? "Used Health Potion in Store" : "Could not use Health Potion in Store");
         }
         else if (choice == 8)
         {
-            std::cout << "\nLeaving the store..." << std::endl;
+            printStoreLine("\nLeaving the store...");
+            actionLog.push("Left Store");
             return;
         }
         else
         {
-            std::cout << "Invalid choice!" << std::endl;
+            ConsoleInput::printInvalidInput();
+            actionLog.push("Entered invalid Store choice");
         }
     }
 }
 
-void Store::buyHealth(Player& player)
+void Store::buyHealth(Player& player, ActionStack& actionLog)
 {
     if (player.getHealth() == 300)
     {
-        std::cout << "Your health is already at the maximum!" << std::endl;
+        printStoreLine("Your health is already at the maximum!");
+        actionLog.push("Could not buy health because health was full");
         return;
     }
 
@@ -80,21 +99,24 @@ void Store::buyHealth(Player& player)
     {
         player.subtractGold(10);
         player.addHealth(10);
-        std::cout << "\nYou bought 10 health.\n" << std::endl;
+        printStoreLine("\nYou bought 10 health.\n");
+        actionLog.push("Bought 10 health");
     }
     else
     {
-        std::cout << "Not enough gold!" << std::endl;
+        printStoreLine("Not enough gold!");
+        actionLog.push("Could not buy health because gold was too low");
     }
 }
 
-void Store::buyWeapon(Player& player)
+void Store::buyWeapon(Player& player, ActionStack& actionLog)
 {
     Inventory& inventory = player.getInventory();
 
     if (player.getGold() < 30)
     {
-        std::cout << "\nNot enough gold!" << std::endl;
+        printStoreLine("\nNot enough gold!");
+        actionLog.push("Could not buy weapon because gold was too low");
         return;
     }
 
@@ -103,96 +125,110 @@ void Store::buyWeapon(Player& player)
         player.subtractGold(30);
         inventory.addItem(Item("Dagger", ItemType::Weapon, 30, "Sharp starter weapon"));
         player.equipWeapon("Dagger");
+        actionLog.push("Bought and equipped Dagger");
     }
     else if (!inventory.containsItem("Claw Hammer"))
     {
         if (player.getXP() < 50)
         {
-            std::cout << "\nYou need at least 50 XP to purchase the Claw Hammer!" << std::endl;
+            printStoreLine("\nYou need at least 50 XP to purchase the Claw Hammer!");
+            actionLog.push("Could not buy Claw Hammer because XP was too low");
             return;
         }
 
         player.subtractGold(30);
         inventory.addItem(Item("Claw Hammer", ItemType::Weapon, 50, "Strong blunt weapon"));
         player.equipWeapon("Claw Hammer");
+        actionLog.push("Bought and equipped Claw Hammer");
     }
     else if (!inventory.containsItem("Sword"))
     {
         if (player.getXP() < 150)
         {
-            std::cout << "\nYou need at least 150 XP to purchase the Sword!" << std::endl;
+            printStoreLine("\nYou need at least 150 XP to purchase the Sword!");
+            actionLog.push("Could not buy Sword because XP was too low");
             return;
         }
 
         player.subtractGold(30);
         inventory.addItem(Item("Sword", ItemType::Weapon, 100, "Required to defeat the Dragon"));
         player.equipWeapon("Sword");
+        actionLog.push("Bought and equipped Sword");
     }
     else
     {
-        std::cout << "You already have the strongest weapon!" << std::endl;
+        printStoreLine("You already have the strongest weapon!");
+        actionLog.push("Could not buy weapon because strongest weapon was already owned");
         return;
     }
 
     inventory.displayInventory();
 }
 
-void Store::sellWeapon(Player& player)
+void Store::sellWeapon(Player& player, ActionStack& actionLog)
 {
     Inventory& inventory = player.getInventory();
     Weapon currentWeapon = player.getCurrentWeapon();
 
     if (currentWeapon.getName() == "Stick")
     {
-        std::cout << "You can't sell your basic weapon!" << std::endl;
+        ConsoleColor::printLine("\nYou can't sell your basic weapon!\n", ConsoleColor::Color::Red);
+        actionLog.push("Could not sell basic weapon");
         return;
     }
 
     if (inventory.removeItem(currentWeapon.getName()))
     {
         player.addGold(15);
-        std::cout << "You sold your " << currentWeapon.getName() << "." << std::endl;
+        printStoreLine("You sold your " + currentWeapon.getName() + ".");
         player.equipWeapon("Stick");
         inventory.displayInventory();
+        actionLog.push("Sold " + currentWeapon.getName());
     }
     else
     {
-        std::cout << "Could not sell weapon." << std::endl;
+        printStoreLine("Could not sell weapon.");
+        actionLog.push("Could not sell " + currentWeapon.getName());
     }
 }
 
-void Store::buyPotion(Player& player)
+void Store::buyPotion(Player& player, ActionStack& actionLog)
 {
     if (player.getGold() < 15)
     {
-        std::cout << "\nNot enough gold!" << std::endl;
+        printStoreLine("\nNot enough gold!");
+        actionLog.push("Could not buy Health Potion because gold was too low");
         return;
     }
 
     player.subtractGold(15);
     player.addItemToInventory(Item("Health Potion", ItemType::Potion, 50, "Restores 50 health"));
 
-    std::cout << "\nYou bought a Health Potion." << std::endl;
+    printStoreLine("\nYou bought a Health Potion.");
+    actionLog.push("Bought Health Potion");
 }
 
-void Store::buyArmor(Player& player)
+void Store::buyArmor(Player& player, ActionStack& actionLog)
 {
     Inventory& inventory = player.getInventory();
 
     if (inventory.containsItem("Leather Armor"))
     {
-        std::cout << "You already own Leather Armor." << std::endl;
+        printStoreLine("You already own Leather Armor.");
+        actionLog.push("Could not buy Leather Armor because it was already owned");
         return;
     }
 
     if (player.getGold() < 40)
     {
-        std::cout << "\nNot enough gold!" << std::endl;
+        printStoreLine("\nNot enough gold!");
+        actionLog.push("Could not buy Leather Armor because gold was too low");
         return;
     }
 
     player.subtractGold(40);
     player.addItemToInventory(Item("Leather Armor", ItemType::Armor, 10, "Basic armor"));
 
-    std::cout << "\nYou bought Leather Armor." << std::endl;
+    printStoreLine("\nYou bought Leather Armor.");
+    actionLog.push("Bought Leather Armor");
 }

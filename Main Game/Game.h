@@ -1,26 +1,20 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "Player.h"
-#include "Store.h"
+#include "../Locations/Ancient Ruins/AncientRuins.h"
 #include "Caves.h"
 #include "DragonsLair.h"
-#include "WorldMap.h"
-#include "EnemyQueue.h"
-#include "ActionStack.h"
-#include <string>
+#include "GameEngine.h"
+#include "Store.h"
 
 class Game
 {
 private:
-    Player player;
-    Store store;
+    AncientRuins ancientRuins;
     Caves caves;
     DragonsLair dragonsLair;
-    
-    WorldMap worldMap;
-    ActionStack actionLog;
-    
+    GameEngine engine;
+    Store store;
     bool running;
 
 public:
@@ -29,12 +23,7 @@ public:
     void start();
     void processLocation();
     void travel();
-    void fightEnemyWave(EnemyQueue& enemies);
-    void fightSingleMonster(Monster& monster);
     void displayMainMenu();
-    void restart();
-    void winGame();
-    void loseGame();
 };
 
 #endif

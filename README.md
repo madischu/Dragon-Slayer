@@ -77,9 +77,13 @@ Queue (Enemy Encounters / Combat Order)
 
 ## Compile and Run
 
-*cmake -S . -B build*
+**Command Line Version**
 
-*cmake --build build*
+*cmake --build build --target DragonSlayer*
+
+*.\build\Debug\DragonSlayer.exe*
+
+**GUI Version**
 
 *cmake --build build --target DragonSlayerGui*
 

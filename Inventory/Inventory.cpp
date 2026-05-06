@@ -1,5 +1,6 @@
 ﻿#include "Inventory.h"
 #include <iostream>
+#include <sstream>
 
 Inventory::Inventory()
 {
@@ -139,36 +140,45 @@ bool Inventory::hasItemType(ItemType type) const
     return false;
 }
 
-void Inventory::displayInventory() const
+std::string Inventory::getInventoryText() const
 {
+    std::ostringstream output;
+
     if (head == nullptr)
     {
-        std::cout << "Inventory is empty." << std::endl;
-        return;
+        output << "Inventory is empty.";
+        return output.str();
     }
 
-    std::cout << "\nInventory:" << std::endl;
+    output << "\nInventory:" << std::endl;
 
     Node* current = head;
     int index = 1;
 
     while (current != nullptr)
     {
-        std::cout << index << ". "
-                  << current->item.getName()
-                  << " | Type: " << current->item.getTypeAsString()
-                  << " | Value: " << current->item.getValue();
+        output << index << ". "
+               << current->item.getName()
+               << " | Type: " << current->item.getTypeAsString()
+               << " | Value: " << current->item.getValue();
 
         if (current->item.getEffect() != "")
         {
-            std::cout << " | Effect: " << current->item.getEffect();
+            output << " | Effect: " << current->item.getEffect();
         }
 
-        std::cout << std::endl;
+        output << std::endl;
 
         current = current->next;
         index++;
     }
+
+    return output.str();
+}
+
+void Inventory::displayInventory() const
+{
+    std::cout << getInventoryText() << std::endl;
 }
 
 void Inventory::displayItemsByType(ItemType type) const

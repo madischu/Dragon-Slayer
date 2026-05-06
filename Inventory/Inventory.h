@@ -35,6 +35,7 @@ public:
     Item getItem(const std::string& itemName) const;
 
     bool hasItemType(ItemType type) const;
+    std::string getInventoryText() const;
     void displayInventory() const;
     void displayItemsByType(ItemType type) const;
 

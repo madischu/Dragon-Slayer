@@ -10,7 +10,9 @@ enum class GuiMode
 {
     Main,
     Store,
-    Combat
+    Combat,
+    CaveChoice,
+    WizardQuest
 };
 
 class GuiGameImpl;
@@ -44,6 +46,12 @@ public:
     std::string dodgeMonster();
     std::string useHealthPotion();
     std::string runFromCombat();
+    std::string fightSlime();
+    std::string fightFangedBeast();
+    std::string leaveCaves();
+    std::string acceptWizardQuest();
+    std::string rejectWizardQuest();
+    std::string presentWizardItems();
 
     std::string getStoreText() const;
     std::string getCombatText() const;
