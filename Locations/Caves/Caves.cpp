@@ -1,9 +1,10 @@
 #include "Caves.h"
 #include "CombatSystem.h"
+#include "../../Main Game/ConsoleColor.h"
+#include "../../Main Game/ConsoleInput.h"
 #include "EnemyQueue.h"
 #include <cstdlib>
 #include <iostream>
-#include <limits>
 #include <vector>
 
 Caves::Caves()
@@ -14,7 +15,7 @@ int Caves::enter(GameEngine& engine)
 {
     Player& player = engine.getPlayer();
 
-    std::cout << "\nYou enter a cave. You see some monsters.\n" << std::endl;
+    ConsoleColor::printLine("\nYou enter a cave. You see some monsters.\n", ConsoleColor::Color::Blue);
     engine.addAction("Entered the caves");
 
     if ((rand() % 100) < 25)
@@ -27,17 +28,16 @@ int Caves::enter(GameEngine& engine)
         while (!enemies.isEmpty() && player.getHealth() > 0)
         {
             Monster currentMonster = enemies.dequeue();
-            std::cout << "\nNext enemy: " << currentMonster.getName() << std::endl;
             engine.addAction("Encountered " + currentMonster.getName());
 
             if (!player.canFightMonster(currentMonster))
             {
-                std::cout << "You are not strong enough to fight this monster!" << std::endl;
+                ConsoleColor::printLine("You are not strong enough to fight this monster!", ConsoleColor::Color::DarkCyan);
                 engine.addAction("Could not fight " + currentMonster.getName() + " because XP was too low");
                 return 0;
             }
 
-            if (!CombatSystem::fight(player, currentMonster, true, false))
+            if (!CombatSystem::fight(player, currentMonster, true, false, true))
             {
                 if (player.getHealth() > 0)
                 {
@@ -56,6 +56,8 @@ int Caves::enter(GameEngine& engine)
 
         if (player.getHealth() > 0)
         {
+            ConsoleColor::printLine("\nYou survived the enemy wave!", ConsoleColor::Color::Blue);
+            ConsoleColor::printLine("\nLeaving the caves...", ConsoleColor::Color::Blue);
             engine.addAction("Completed a cave enemy wave");
         }
 
@@ -71,7 +73,7 @@ int Caves::enter(GameEngine& engine)
         monsters.push_back(enemies.dequeue());
     }
 
-    std::cout << "Choose a monster to fight:" << std::endl;
+    ConsoleColor::printLine("Choose a monster to fight:", ConsoleColor::Color::Blue);
     for (int i = 0; i < static_cast<int>(monsters.size()); ++i)
     {
         std::cout << i + 1 << ": " << monsters[i].getName() << std::endl;
@@ -81,19 +83,22 @@ int Caves::enter(GameEngine& engine)
     int choice;
     while (true)
     {
-        if (std::cin >> choice && choice >= 1 && choice <= static_cast<int>(monsters.size()) + 1)
+        if (!ConsoleInput::readInt(choice))
+        {
+            return 0;
+        }
+
+        if (choice >= 1 && choice <= static_cast<int>(monsters.size()) + 1)
         {
             break;
         }
 
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid choice! Choose again: ";
+        ConsoleInput::printInvalidInput();
     }
 
     if (choice == static_cast<int>(monsters.size()) + 1)
     {
-        std::cout << "\nLeaving the caves..." << std::endl;
+        ConsoleColor::printLine("\nLeaving the caves...", ConsoleColor::Color::Blue);
         engine.addAction("Left the caves without fighting");
         return 0;
     }
@@ -103,7 +108,7 @@ int Caves::enter(GameEngine& engine)
 
     if (!player.canFightMonster(selectedMonster))
     {
-        std::cout << "You are not strong enough to fight this monster!" << std::endl;
+        ConsoleColor::printLine("You are not strong enough to fight this monster!", ConsoleColor::Color::DarkCyan);
         engine.addAction("Could not fight " + selectedMonster.getName() + " because XP was too low");
         return 0;
     }
@@ -119,6 +124,11 @@ int Caves::enter(GameEngine& engine)
     else
     {
         engine.addAction("Player was defeated");
+    }
+
+    if (player.getHealth() > 0)
+    {
+        ConsoleColor::printLine("\nLeaving the caves...", ConsoleColor::Color::Blue);
     }
 
     return 0;

@@ -186,12 +186,11 @@ bool Player::dodge(Monster& monster)
 
     if (rand() % 100 < dodgeChance)
     {
-        std::cout << "\nYou dodge the attack from the "
-                  << monster.getName() << "!\n";
+        ConsoleColor::printLine("\nYou dodge the attack from the " + monster.getName() + "!\n", ConsoleColor::Color::Blue);
         return true;
     }
 
-    std::cout << "\nYou failed to dodge!" << std::endl;
+    ConsoleColor::printLine("\nYou failed to dodge!", ConsoleColor::Color::Blue);
     return false;
 }
 
@@ -257,35 +256,33 @@ void Player::defeatMonster(Monster& monster)
     gold += goldEarned;
     xp += monster.getLevel();
 
-    std::cout << "You defeated the " << monster.getName() << "!\n" << std::endl;
+    ConsoleColor::printLine("You defeated the " + monster.getName() + "!\n", ConsoleColor::Color::Blue);
 
     if (monster.getName() == "Slime")
     {
         inventory.addItem(Item("Slime Gel", ItemType::Treasure, 5, "Can be sold later"));
-        std::cout << "You found Slime Gel." << std::endl;
+        ConsoleColor::printLine("You found Slime Gel.\n", ConsoleColor::Color::DarkMagenta);
     }
     else if (monster.getName() == "Fanged Beast")
     {
         inventory.addItem(Item("Beast Fang", ItemType::Treasure, 15, "A sharp monster trophy"));
-        std::cout << "You found a Beast Fang." << std::endl;
+        ConsoleColor::printLine("You found a Beast Fang.\n", ConsoleColor::Color::DarkMagenta);
     }
     else if (monster.getName() == "Ghoul")
     {
         inventory.addItem(Item("Ghoul Bone", ItemType::Treasure, 25, "A rare monster drop"));
-        std::cout << "You found a Ghoul Bone." << std::endl;
+        ConsoleColor::printLine("You found a Ghoul Bone.\n", ConsoleColor::Color::DarkMagenta);
     }
     else if (monster.getName() == "Dragon")
     {
         inventory.addItem(Item("Dragon Scale", ItemType::Treasure, 100, "Proof that you defeated the dragon"));
-        std::cout << "You found a Dragon Scale." << std::endl;
+        ConsoleColor::printLine("You found a Dragon Scale.\n", ConsoleColor::Color::DarkMagenta);
     }
 
     displayStats();
 
-    std::cout << "\nYou earned " << goldEarned << " gold and "
-              << monster.getLevel() << " XP." << std::endl;
-
-    std::cout << "\nLeaving the caves..." << std::endl;
+    ConsoleColor::printLine("\nYou earned " + std::to_string(goldEarned) + " gold and "
+              + std::to_string(monster.getLevel()) + " XP.", ConsoleColor::Color::DarkMagenta);
 }
 
 void Player::displayStats() const

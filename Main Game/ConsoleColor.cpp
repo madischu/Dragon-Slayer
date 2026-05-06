@@ -9,6 +9,40 @@
 namespace
 {
 #ifdef _WIN32
+    bool enableVirtualTerminalColors()
+    {
+        HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD consoleMode;
+
+        if (console == INVALID_HANDLE_VALUE || !GetConsoleMode(console, &consoleMode))
+        {
+            return false;
+        }
+
+        if ((consoleMode & ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0)
+        {
+            return true;
+        }
+
+        return SetConsoleMode(console, consoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING) != 0;
+    }
+
+    const char* getAnsiCode(ConsoleColor::Color color)
+    {
+        switch (color)
+        {
+            case ConsoleColor::Color::LightPurple:
+                return "\033[38;2;205;170;255m";
+            case ConsoleColor::Color::Brown:
+                return "\033[38;2;139;90;43m";
+            case ConsoleColor::Color::LightBrown:
+                return "\033[38;2;181;137;91m";
+            case ConsoleColor::Color::Default:
+            default:
+                return "\033[0m";
+        }
+    }
+
     WORD getWindowsAttribute(ConsoleColor::Color color)
     {
         switch (color)
@@ -26,6 +60,7 @@ namespace
             case ConsoleColor::Color::DarkMagenta:
                 return FOREGROUND_RED | FOREGROUND_BLUE;
             case ConsoleColor::Color::DarkYellow:
+            case ConsoleColor::Color::Brown:
                 return FOREGROUND_RED | FOREGROUND_GREEN;
             case ConsoleColor::Color::Gray:
                 return FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
@@ -40,9 +75,11 @@ namespace
             case ConsoleColor::Color::Red:
                 return FOREGROUND_RED | FOREGROUND_INTENSITY;
             case ConsoleColor::Color::Magenta:
+            case ConsoleColor::Color::LightPurple:
                 return FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
             case ConsoleColor::Color::Yellow:
             case ConsoleColor::Color::Gold:
+            case ConsoleColor::Color::LightBrown:
                 return FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
             case ConsoleColor::Color::White:
                 return FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
@@ -104,10 +141,16 @@ namespace
                 return "\033[91m";
             case ConsoleColor::Color::Magenta:
                 return "\033[95m";
+            case ConsoleColor::Color::LightPurple:
+                return "\033[38;2;205;170;255m";
             case ConsoleColor::Color::Yellow:
                 return "\033[93m";
             case ConsoleColor::Color::Gold:
                 return "\033[33m";
+            case ConsoleColor::Color::Brown:
+                return "\033[38;2;139;90;43m";
+            case ConsoleColor::Color::LightBrown:
+                return "\033[38;2;181;137;91m";
             case ConsoleColor::Color::White:
                 return "\033[97m";
             case ConsoleColor::Color::Default:
@@ -124,6 +167,13 @@ void ConsoleColor::set(Color color)
     static const WORD defaultAttribute = getDefaultAttribute();
     HANDLE console = getConsole();
 
+    if ((color == Color::LightPurple || color == Color::Brown || color == Color::LightBrown)
+        && enableVirtualTerminalColors())
+    {
+        std::cout << getAnsiCode(color);
+        return;
+    }
+
     if (console == INVALID_HANDLE_VALUE)
     {
         return;
@@ -137,6 +187,14 @@ void ConsoleColor::set(Color color)
 
 void ConsoleColor::reset()
 {
+#ifdef _WIN32
+    if (enableVirtualTerminalColors())
+    {
+        std::cout << "\033[0m";
+        return;
+    }
+#endif
+
     set(Color::Default);
 }
 

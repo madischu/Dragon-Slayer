@@ -1,31 +1,10 @@
 #include "DarkForest.h"
 #include "../../Main Game/ConsoleColor.h"
+#include "../../Main Game/ConsoleInput.h"
 #include "../../Main Game/GameEngine.h"
 
 #include <cstdlib>
 #include <iostream>
-#include <limits>
-
-namespace
-{
-    bool readQuestChoice(int& choice)
-    {
-        if (std::cin >> choice)
-        {
-            return true;
-        }
-
-        if (std::cin.eof())
-        {
-            return false;
-        }
-
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        ConsoleColor::printLine("Invalid input. Please enter a number.", ConsoleColor::Color::White);
-        return false;
-    }
-}
 
 DarkForest::DarkForest()
 {
@@ -112,7 +91,7 @@ void DarkForest::enter(GameEngine& engine)
             ConsoleColor::printLine(getQuestMenuText(), ConsoleColor::Color::White);
 
             int choice;
-            if (!readQuestChoice(choice))
+            if (!ConsoleInput::readInt(choice))
             {
                 return;
             }
@@ -132,7 +111,7 @@ void DarkForest::enter(GameEngine& engine)
             }
             else
             {
-                ConsoleColor::printLine("Invalid choice.", ConsoleColor::Color::White);
+                ConsoleInput::printInvalidInput();
                 engine.addAction("Entered invalid wizard quest choice");
             }
         }

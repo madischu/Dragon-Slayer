@@ -23,8 +23,11 @@ namespace ConsoleColor
         Cyan,
         Red,
         Magenta,
+        LightPurple,
         Yellow,
         Gold,
+        Brown,
+        LightBrown,
         White
     };
 

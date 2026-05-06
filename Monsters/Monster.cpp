@@ -1,4 +1,5 @@
 #include "Monster.h"
+#include "../../Main Game/ConsoleColor.h"
 #include <cstdlib>
 #include <iostream>
 
@@ -71,6 +72,6 @@ int Monster::attack()
         baseDamage = 0;
     }
 
-    std::cout << name << " attacks for " << baseDamage << " damage!" << std::endl;
+    ConsoleColor::printLine(name + " attacks for " + std::to_string(baseDamage) + " damage!", ConsoleColor::Color::DarkRed);
     return baseDamage;
 }

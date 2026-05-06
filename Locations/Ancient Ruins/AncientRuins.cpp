@@ -1,4 +1,5 @@
 #include "AncientRuins.h"
+#include "../../Main Game/ConsoleColor.h"
 
 #include <iostream>
 
@@ -8,6 +9,6 @@ AncientRuins::AncientRuins()
 
 void AncientRuins::enter(GameEngine& engine)
 {
-    std::cout << "\nYou explore the Ancient Ruins. There are no enemies here." << std::endl;
+    ConsoleColor::printLine("\nYou explore the Ancient Ruins. You find nothing here.", ConsoleColor::Color::Brown);
     engine.addAction("Explored the Ancient Ruins");
 }

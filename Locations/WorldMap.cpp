@@ -1,4 +1,5 @@
 #include "WorldMap.h"
+#include "../Main Game/ConsoleColor.h"
 #include <iostream>
 
 WorldMap::WorldMap()
@@ -71,7 +72,7 @@ void WorldMap::displayCurrentLocation() const
 
 void WorldMap::displayAvailablePaths() const
 {
-    std::cout << "\nAvailable paths:" << std::endl;
+    ConsoleColor::printLine("\nAvailable paths:", ConsoleColor::Color::Magenta);
 
     for (int i = 0; i < locations[currentLocationIndex].connectedLocations.size(); i++)
     {
@@ -119,7 +120,6 @@ bool WorldMap::moveToLocation(int choice)
 
     if (pathIndex < 0 || pathIndex >= locations[currentLocationIndex].connectedLocations.size())
     {
-        std::cout << "Invalid path choice." << std::endl;
         return false;
     }
 

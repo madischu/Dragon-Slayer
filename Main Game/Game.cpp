@@ -1,29 +1,7 @@
 #include "Game.h"
 #include "ConsoleColor.h"
+#include "ConsoleInput.h"
 #include <iostream>
-#include <limits>
-
-namespace
-{
-    bool readMenuChoice(int& choice)
-    {
-        if (std::cin >> choice)
-        {
-            return true;
-        }
-
-        if (std::cin.eof())
-        {
-            return false;
-        }
-
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input. Please enter a number." << std::endl;
-        return false;
-    }
-
-}
 
 Game::Game()
 {
@@ -32,20 +10,17 @@ Game::Game()
 
 void Game::start()
 {
-    std::cout << "\nWelcome to Dragon Slayer. You must defeat the dragon that is preventing people from leaving the town.\n\nYou are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'." << std::endl;
+    ConsoleColor::printLine("\nWelcome to Dragon Slayer. You must defeat the dragon that is preventing people from leaving the town.", ConsoleColor::Color::LightPurple);
+	ConsoleColor::printLine("\nYou are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'.", ConsoleColor::Color::DarkMagenta);
 
     while (running)
     {
         displayMainMenu();
 
         int choice;
-        if (!readMenuChoice(choice))
+        if (!ConsoleInput::readInt(choice))
         {
-            if (std::cin.eof())
-            {
-                running = false;
-            }
-
+            running = false;
             continue;
         }
 
@@ -69,19 +44,19 @@ void Game::start()
         }
         else if (choice == 5)
         {
-            std::cout << "\nExiting the game. Thanks for playing!" << std::endl;
+            ConsoleColor::printLine("\nExiting the game. Thanks for playing!", ConsoleColor::Color::LightPurple);
             running = false;
         }
         else
         {
-            std::cout << "Invalid choice." << std::endl;
+            ConsoleInput::printInvalidInput();
         }
     }
 }
 
 void Game::displayMainMenu()
 {
-    std::cout << "\nChoose an option:" << std::endl;
+    ConsoleColor::printLine("\nChoose an option:", ConsoleColor::Color::DarkMagenta);
     std::cout << "1: Travel" << std::endl;
     std::cout << "2: View Stats" << std::endl;
     std::cout << "3: View Inventory" << std::endl;
@@ -93,26 +68,38 @@ void Game::travel()
 {
     engine.getWorldMap().displayAvailablePaths();
 
-    std::cout << "\nWhere would you like to go? ";
-    int choice;
-    if (!readMenuChoice(choice))
+    ConsoleColor::print("\nWhere would you like to go? ", ConsoleColor::Color::DarkMagenta);
+    while (running)
     {
-        return;
-    }
-
-    std::string message;
-    if (engine.travelToPathIndex(choice, message))
-    {
-        if (engine.getCurrentLocation() == "Dark Forest")
+        int choice;
+        if (!ConsoleInput::readInt(choice))
         {
-            ConsoleColor::printLine(message, ConsoleColor::Color::DarkGreen);
-        }
-        else
-        {
-            std::cout << message << std::endl;
+            running = false;
+            return;
         }
 
-        processLocation();
+        std::string message;
+        if (engine.travelToPathIndex(choice, message))
+        {
+            if (engine.getCurrentLocation() == "Dark Forest")
+            {
+                ConsoleColor::printLine(message, ConsoleColor::Color::DarkGreen);
+            }
+            else
+            {
+                std::cout << message << std::endl;
+            }
+
+            processLocation();
+            return;
+        }
+
+        if (!message.empty())
+        {
+            ConsoleInput::printInvalidInput();
+        }
+
+        ConsoleColor::print("\nWhere would you like to go? ", ConsoleColor::Color::Magenta);
     }
 }
 
@@ -122,7 +109,7 @@ void Game::processLocation()
 
     if (location == "Town Square")
     {
-        std::cout << "\nYou are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'." << std::endl;
+        ConsoleColor::printLine("\nYou are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'.", ConsoleColor::Color::DarkMagenta);
         engine.addAction("Visited Town Square");
     }
     else if (location == "Store")

@@ -1,18 +1,30 @@
 #include "CombatSystem.h"
+#include "../../Main Game/ConsoleColor.h"
+#include "../../Main Game/ConsoleInput.h"
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 namespace
 {
     bool weaponBreaksEnabled = true;
 }
 
-bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway, bool canWeaponBreak)
+bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway, bool canWeaponBreak, bool showNextEnemy)
 {
     weaponBreaksEnabled = canWeaponBreak;
 
-    std::cout << "\nYou are fighting a " << monster.getName() << "." << std::endl;
-    std::cout << "Monster Health: " << monster.getHealth() << "\n" << std::endl;
+    ConsoleColor::printLine("\nYou are fighting a " + monster.getName() + ".", ConsoleColor::Color::Blue);
+    ConsoleColor::printLine("Monster Health: " + std::to_string(monster.getHealth()), ConsoleColor::Color::DarkRed);
+
+    if (showNextEnemy)
+    {
+        ConsoleColor::printLine("\nNext enemy: " + monster.getName() + "\n", ConsoleColor::Color::Blue);
+    }
+    else
+    {
+        std::cout << std::endl;
+    }
 
     while (player.getHealth() > 0 && monster.getHealth() > 0)
     {
@@ -22,7 +34,11 @@ bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway, bool
         std::cout << "4: Run Away" << std::endl;
 
         int action;
-        std::cin >> action;
+        if (!ConsoleInput::readInt(action))
+        {
+            weaponBreaksEnabled = true;
+            return false;
+        }
 
         if (action == 1)
         {
@@ -48,16 +64,16 @@ bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway, bool
         {
             if (canRunAway)
             {
-                std::cout << "\nYou run away from the battle!" << std::endl;
+                ConsoleColor::printLine("\nYou run away from the battle!", ConsoleColor::Color::Blue);
                 weaponBreaksEnabled = true;
                 return false;
             }
 
-            std::cout << "You cannot run away from this battle!" << std::endl;
+            ConsoleColor::printLine("You cannot run away from this battle!", ConsoleColor::Color::DarkMagenta);
         }
         else
         {
-            std::cout << "Invalid choice!" << std::endl;
+            ConsoleInput::printInvalidInput();
         }
     }
 
@@ -75,8 +91,8 @@ void CombatSystem::playerAttack(Player& player, Monster& monster)
 
     Weapon currentWeapon = player.getCurrentWeapon();
 
-    std::cout << "\nThe " << monster.getName() << " attacks!" << std::endl;
-    std::cout << "\nYou attack with your " << currentWeapon.getName() << "!\n";
+    ConsoleColor::printLine("\nThe " + monster.getName() + " attacks!", ConsoleColor::Color::DarkRed);
+    ConsoleColor::printLine("\nYou attack with your " + currentWeapon.getName() + "!", ConsoleColor::Color::Blue);
 
     int bonus = player.getXP() / 10;
     int baseDamage = currentWeapon.getPower();
@@ -97,35 +113,35 @@ void CombatSystem::playerAttack(Player& player, Monster& monster)
         finalDamage = (totalDamage * effectiveness) / baseDamage;
     }
 
-    std::cout << "\n*************************" << std::endl;
+    ConsoleColor::printLine("\n*************************", ConsoleColor::Color::Cyan);
     std::cout << "Base Damage: " << baseDamage << std::endl;
     std::cout << "XP Bonus: " << bonus << std::endl;
     std::cout << "Effectiveness: " << effectivenessPercentage << "%" << std::endl;
     std::cout << "Final Damage: " << finalDamage << std::endl;
-    std::cout << "*************************" << std::endl;
+    ConsoleColor::printLine("*************************", ConsoleColor::Color::Cyan);
 
     if (weaponBreaksEnabled && rand() % 5 == 0 && currentWeapon.getName() != "Stick")
     {
-        std::cout << "\nYour " << currentWeapon.getName() << " broke!" << std::endl;
+        ConsoleColor::printLine("\nYour " + currentWeapon.getName() + " broke!", ConsoleColor::Color::Red);
         player.removeItemFromInventory(currentWeapon.getName());
         player.equipWeapon("Stick");
-        std::cout << "You switched to your " << player.getCurrentWeapon().getName() << "!" << std::endl;
+        ConsoleColor::printLine("You switched to your " + player.getCurrentWeapon().getName() + "!", ConsoleColor::Color::Blue);
     }
 
     if (player.isMonsterHit())
     {
         if (effectiveness < baseDamage)
         {
-            std::cout << "\nYour weapon is not very effective against this monster!" << std::endl;
+            ConsoleColor::printLine("\nYour weapon is not very effective against this monster!", ConsoleColor::Color::Red);
         }
 
-        std::cout << "\nYou dealt " << finalDamage << " damage!" << std::endl;
+        ConsoleColor::printLine("\nYou dealt " + std::to_string(finalDamage) + " damage!", ConsoleColor::Color::Blue);
         monster.takeDamage(finalDamage, currentWeapon.getType());
-        std::cout << "\n" << monster.getName() << " now has " << monster.getHealth() << " HP left." << std::endl;
+        ConsoleColor::printLine("\n" + monster.getName() + " now has " + std::to_string(monster.getHealth()) + " HP left.\n", ConsoleColor::Color::DarkRed);
     }
     else
     {
-        std::cout << "\nYou missed!\n" << std::endl;
+        ConsoleColor::printLine("\nYou missed!\n", ConsoleColor::Color::Red);
     }
 
     if (monster.getHealth() <= 0)
@@ -136,5 +152,5 @@ void CombatSystem::playerAttack(Player& player, Monster& monster)
 
     int monsterDamage = monster.attack();
     player.takeDamage(monsterDamage);
-    std::cout << "\nYou took " << monsterDamage << " damage! Current health: " << player.getHealth() << std::endl;
+    ConsoleColor::printLine("\nYou took " + std::to_string(monsterDamage) + " damage! Current health: " + std::to_string(player.getHealth()) + "\n", ConsoleColor::Color::Blue);
 }
