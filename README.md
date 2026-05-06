@@ -89,6 +89,9 @@ Queue (Enemy Encounters / Combat Order)
 
 *.\build\Debug\DragonSlayerGui.exe*
 
+## Use Case Diagram
+<img width="510" height="770" alt="image" src="https://github.com/user-attachments/assets/c898e41b-9e66-4024-ad50-712ed8acd36e" />
+
 ## Program Execution Evidence
 <img width="1323" height="658" alt="image" src="https://github.com/user-attachments/assets/7ffd9e90-dee4-4dcc-8323-329207933064" />
 
