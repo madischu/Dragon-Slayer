@@ -46,6 +46,7 @@ public:
     std::string presentWizardItems();
 
     void addAction(const std::string& action);
+    void restartPreservingActionLog();
     bool travelToPathIndex(int pathChoice, std::string& message);
     bool travelToLocation(const std::string& locationName, std::string& message);
 

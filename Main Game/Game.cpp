@@ -10,8 +10,7 @@ Game::Game()
 
 void Game::start()
 {
-    ConsoleColor::printLine("\nWelcome to Dragon Slayer. You must defeat the dragon that is preventing people from leaving the town.", ConsoleColor::Color::LightPurple);
-	ConsoleColor::printLine("\nYou are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'.", ConsoleColor::Color::DarkMagenta);
+    displayIntro();
 
     while (running)
     {
@@ -52,6 +51,12 @@ void Game::start()
             ConsoleInput::printInvalidInput();
         }
     }
+}
+
+void Game::displayIntro()
+{
+    ConsoleColor::printLine("\nWelcome to Dragon Slayer. You must defeat the dragon that is preventing people from leaving the town.", ConsoleColor::Color::LightPurple);
+    ConsoleColor::printLine("\nYou are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'.", ConsoleColor::Color::DarkMagenta);
 }
 
 void Game::displayMainMenu()
@@ -109,7 +114,7 @@ void Game::processLocation()
 
     if (location == "Town Square")
     {
-        ConsoleColor::printLine("\nYou are in the Town Square. You see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'.", ConsoleColor::Color::DarkMagenta);
+        ConsoleColor::printLine("\nYou are in the Town Square. You look around and see four signs marked 'Store', 'Ancient Ruins', 'Dark Forest', and 'Caves'. What would you like to do?", ConsoleColor::Color::DarkMagenta);
         engine.addAction("Visited Town Square");
     }
     else if (location == "Store")
@@ -123,7 +128,7 @@ void Game::processLocation()
 
         if (engine.getPlayer().getHealth() <= 0)
         {
-            running = false;
+            handlePlayerDefeat();
         }
     }
     else if (location == "Dark Forest")
@@ -140,7 +145,44 @@ void Game::processLocation()
         if (!dragonsLair.enter(engine.getPlayer()) && engine.getPlayer().getHealth() <= 0)
         {
             engine.addAction("Player was defeated");
-            running = false;
+            handlePlayerDefeat();
         }
+    }
+}
+
+void Game::handlePlayerDefeat()
+{
+    ConsoleColor::printLine("\nYou have been defeated!", ConsoleColor::Color::Red);
+
+    while (true)
+    {
+        ConsoleColor::printLine("\nPlay Again?", ConsoleColor::Color::DarkMagenta);
+        std::cout << "1: Replay" << std::endl;
+        std::cout << "2: Quit Game" << std::endl;
+
+        int choice;
+        if (!ConsoleInput::readInt(choice))
+        {
+            running = false;
+            return;
+        }
+
+        if (choice == 1)
+        {
+            engine.restartPreservingActionLog();
+            engine.addAction("Replayed after defeat");
+            running = true;
+            displayIntro();
+            return;
+        }
+
+        if (choice == 2)
+        {
+            ConsoleColor::printLine("\nExiting the game. Thanks for playing!", ConsoleColor::Color::LightPurple);
+            running = false;
+            return;
+        }
+
+        ConsoleInput::printInvalidInput();
     }
 }

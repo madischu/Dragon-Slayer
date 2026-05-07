@@ -63,6 +63,13 @@ void WorldMap::buildDefaultMap()
     currentLocationIndex = findLocationIndex("Town Square");
 }
 
+void WorldMap::resetDefaultMap()
+{
+    locations.clear();
+    currentLocationIndex = 0;
+    buildDefaultMap();
+}
+
 void WorldMap::displayCurrentLocation() const
 {
     std::cout << "\nCurrent Location: "

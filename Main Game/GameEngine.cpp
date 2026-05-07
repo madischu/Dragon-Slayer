@@ -123,6 +123,13 @@ void GameEngine::addAction(const std::string& action)
     actionLog.push(action);
 }
 
+void GameEngine::restartPreservingActionLog()
+{
+    player = Player();
+    worldMap.resetDefaultMap();
+    darkForest.clearEncounter();
+}
+
 bool GameEngine::travelToPathIndex(int pathChoice, std::string& message)
 {
     std::string previousLocation = worldMap.getCurrentLocation();

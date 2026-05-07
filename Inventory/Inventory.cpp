@@ -160,7 +160,7 @@ std::string Inventory::getInventoryText() const
         output << index << ". "
                << current->item.getName()
                << " | Type: " << current->item.getTypeAsString()
-               << " | Value: " << current->item.getValue();
+               << " | Damage: " << current->item.getValue();
 
         if (current->item.getEffect() != "")
         {

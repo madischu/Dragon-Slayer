@@ -24,6 +24,8 @@ public:
     void processLocation();
     void travel();
     void displayMainMenu();
+    void displayIntro();
+    void handlePlayerDefeat();
 };
 
 #endif

@@ -83,6 +83,7 @@ void EnemyQueue::buildCaveWave()
 
     enqueue(Monster("Slime", 2, 15, "blunt"));
     enqueue(Monster("Fanged Beast", 8, 60, "sharp"));
+    enqueue(Monster("Ghoul", 20, 150, "blunt"));
 }
 
 void EnemyQueue::buildCaveWaveForWeapon(const Weapon& weapon)

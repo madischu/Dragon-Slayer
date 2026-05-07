@@ -30,6 +30,7 @@ public:
     void addLocation(const std::string& locationName);
     void addPath(const std::string& from, const std::string& to);
     void buildDefaultMap();
+    void resetDefaultMap();
 
     void displayCurrentLocation() const;
     void displayAvailablePaths() const;

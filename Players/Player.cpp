@@ -208,13 +208,13 @@ bool Player::canFightMonster(Monster& monster) const
 {
     if (monster.getName() == "Ghoul" && xp < 75)
     {
-        std::cout << "\nYou need 75 XP to fight the Ghoul!" << std::endl;
+        ConsoleColor::printLine("\nYou need 75 XP to fight the Ghoul!\n", ConsoleColor::Color::Blue);
         return false;
     }
 
     if (monster.getName() == "Dragon" && xp < 150)
     {
-        std::cout << "\nYou need 150 XP to fight the Dragon!" << std::endl;
+        ConsoleColor::printLine("\nYou need 150 XP to fight the Dragon!", ConsoleColor::Color::LightPurple);
         return false;
     }
 
