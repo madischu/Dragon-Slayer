@@ -11,6 +11,7 @@ namespace
 #ifdef _WIN32
     bool enableVirtualTerminalColors()
     {
+        // Windows needs this mode enabled before RGB ANSI colors such as LightPurple can render.
         HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
         DWORD consoleMode;
 

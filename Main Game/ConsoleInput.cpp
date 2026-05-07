@@ -11,6 +11,7 @@ void ConsoleInput::printInvalidInput()
 
 bool ConsoleInput::readInt(int& value)
 {
+    // Keep retrying after non-numeric input so callers do not have to duplicate cleanup logic.
     while (true)
     {
         if (std::cin >> value)

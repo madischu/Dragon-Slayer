@@ -12,6 +12,7 @@ DarkForest::DarkForest()
 
 void DarkForest::rollForWizardEncounter(ActionStack& actionLog)
 {
+    // The encounter is stored here so GameEngine does not duplicate Dark Forest state.
     pendingWizardEncounter = (rand() % 100) < 30;
 
     if (pendingWizardEncounter)
@@ -86,6 +87,7 @@ void DarkForest::enter(GameEngine& engine)
     {
         ConsoleColor::printLine("\n" + interactWithWizard(engine.getPlayer(), engine.getActionLog(), engine.getCurrentLocation()), ConsoleColor::Color::DarkGreen);
 
+        // The quest prompt behaves like the store: it remains open until the player rejects it.
         while (true)
         {
             ConsoleColor::printLine(getQuestMenuText(), ConsoleColor::Color::White);

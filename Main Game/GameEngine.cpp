@@ -125,6 +125,7 @@ void GameEngine::addAction(const std::string& action)
 
 void GameEngine::restartPreservingActionLog()
 {
+    // Do not replace actionLog here; replay should keep the previous run's history visible.
     player = Player();
     worldMap.resetDefaultMap();
     darkForest.clearEncounter();
@@ -164,6 +165,7 @@ void GameEngine::handleCompletedTravel(const std::string& previousLocation, std:
     std::string newLocation = worldMap.getCurrentLocation();
     actionLog.push("Moved from " + previousLocation + " to " + newLocation);
 
+    // Location-specific arrival effects stay with the location class.
     if (newLocation == "Dark Forest")
     {
         darkForest.handleTravelArrival(actionLog, message);

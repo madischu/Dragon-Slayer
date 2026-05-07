@@ -90,6 +90,7 @@ void EnemyQueue::buildCaveWaveForWeapon(const Weapon& weapon)
 {
     clear();
 
+    // Wave enemies match the equipped weapon type so the player can damage every enemy in the wave.
     if (weapon.getType() == "sharp")
     {
         enqueue(Monster("Fanged Beast", 8, 60, "sharp"));

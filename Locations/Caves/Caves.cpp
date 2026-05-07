@@ -25,6 +25,7 @@ int Caves::enter(GameEngine& engine)
         EnemyQueue enemies;
         enemies.buildCaveWaveForWeapon(player.getCurrentWeapon());
 
+        // Enemy waves are resolved here as one sequence so the cave does not restart between enemies.
         while (!enemies.isEmpty() && player.getHealth() > 0)
         {
             Monster currentMonster = enemies.dequeue();
@@ -68,6 +69,7 @@ int Caves::enter(GameEngine& engine)
     enemies.buildCaveWave();
 
     std::vector<Monster> monsters;
+    // Convert the queue into a stable menu list so the player can choose exactly one monster.
     while (!enemies.isEmpty())
     {
         monsters.push_back(enemies.dequeue());

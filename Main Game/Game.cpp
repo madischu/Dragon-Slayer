@@ -74,6 +74,7 @@ void Game::travel()
     engine.getWorldMap().displayAvailablePaths();
 
     ConsoleColor::print("\nWhere would you like to go? ", ConsoleColor::Color::DarkMagenta);
+    // Travel stays in this loop until the player chooses a valid connected path.
     while (running)
     {
         int choice;
@@ -154,6 +155,7 @@ void Game::handlePlayerDefeat()
 {
     ConsoleColor::printLine("\nYou have been defeated!", ConsoleColor::Color::Red);
 
+    // Replay resets the game world and player, but keeps the linked-list action history intact.
     while (true)
     {
         ConsoleColor::printLine("\nPlay Again?", ConsoleColor::Color::DarkMagenta);

@@ -7,6 +7,7 @@
 
 namespace
 {
+    // Enemy waves disable weapon breaking without changing the normal combat attack code path.
     bool weaponBreaksEnabled = true;
 }
 
@@ -17,6 +18,7 @@ bool CombatSystem::fight(Player& player, Monster& monster, bool canRunAway, bool
     ConsoleColor::printLine("\nYou are fighting a " + monster.getName() + ".", ConsoleColor::Color::Blue);
     ConsoleColor::printLine("Monster Health: " + std::to_string(monster.getHealth()), ConsoleColor::Color::DarkRed);
 
+    // Wave fights label the queued enemy after health so the combat header stays grouped.
     if (showNextEnemy)
     {
         ConsoleColor::printLine("\nNext enemy: " + monster.getName() + "\n", ConsoleColor::Color::Blue);
@@ -110,6 +112,7 @@ void CombatSystem::playerAttack(Player& player, Monster& monster)
 
     if (baseDamage != 0)
     {
+        // Scale total damage by weapon effectiveness while avoiding division by zero.
         finalDamage = (totalDamage * effectiveness) / baseDamage;
     }
 
