@@ -89,6 +89,9 @@ Queue (Enemy Encounters / Combat Order)
 
 *.\build\Debug\DragonSlayerGui.exe*
 
+## UML Diagram
+<img width="342" height="855" alt="image" src="https://github.com/user-attachments/assets/15c55ab1-fdfb-45ab-9606-d3447f13a1f0" />
+
 ## Use Case Diagram
 <img width="510" height="770" alt="image" src="https://github.com/user-attachments/assets/c898e41b-9e66-4024-ad50-712ed8acd36e" />
 
